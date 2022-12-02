@@ -11,8 +11,13 @@ class GradeLevel extends Model
 
     protected $guarded = [''];
 
-    public function records()
+    public function records(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Record::class);
+    }
+
+    public function settlements(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Settlement::class);
     }
 }

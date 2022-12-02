@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Department;
 use App\Models\GradeLevel;
+use App\Models\Module;
 use App\Models\Record;
 use App\Models\Role;
 use App\Models\User;
@@ -76,6 +77,11 @@ class InstallAdmin extends Command
             'status' => 'in-service'
         ]);
 
+        $this->info("Admin User Created Successfully");
+        $this->info("Creating Modules");
+        $this->addModules();
+        $this->info("Modules Created Successfully");
+
         $this->info("Admin record has been created successfully!!!");
     }
 
@@ -121,6 +127,39 @@ class InstallAdmin extends Command
             'name' => 'Admin Level',
             'key' => 'AD01'
         ]);
+    }
+
+    protected function addModules(): bool
+    {
+        foreach ($this->getAdminModules() as $module) {
+            Module::create($module);
+        }
+
+        return true;
+    }
+
+    protected function getAdminModules(): array
+    {
+        return [
+            [
+                'name' => 'Admin',
+                'label' => 'admin',
+                'code' => 'ADD',
+                'icon' => 'settings',
+                'url' => '/admin',
+                'parentId' => 0,
+                'type' => 'application'
+            ],
+            [
+                'name' => 'Modules',
+                'label' => 'modules',
+                'code' => 'MODD',
+                'icon' => 'layers',
+                'url' => '/admin/modules',
+                'parentId' => 1,
+                'type' => 'module'
+            ],
+        ];
     }
 
     protected function addOrganization()

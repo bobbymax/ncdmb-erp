@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Milestone;
 use App\Models\Timeline;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -19,7 +20,7 @@ class MilestoneController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $milestones = Milestone::latest()->get();
 
@@ -51,10 +52,10 @@ class MilestoneController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'project_id' => 'required|integer',
@@ -62,6 +63,7 @@ class MilestoneController extends Controller
             'percentage_payment' => 'required|integer',
             'period' => 'required|integer',
             'description' => 'required',
+            'due_date' => 'required|date',
             'measure' => 'required|string|in:days,weeks,months,years'
         ]);
 
@@ -80,6 +82,7 @@ class MilestoneController extends Controller
             'period' => $request->period,
             'description' => $request->description,
             'measure' => $request->measure,
+            'due_date' => Carbon::parse($request->due_date)
         ]);
 
         $timeline = new Timeline;
@@ -98,7 +101,7 @@ class MilestoneController extends Controller
      * @param  $milestone
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($milestone)
+    public function show($milestone): \Illuminate\Http\JsonResponse
     {
         $milestone = Milestone::find($milestone);
 
@@ -123,7 +126,7 @@ class MilestoneController extends Controller
      * @param  $milestone
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($milestone)
+    public function edit($milestone): \Illuminate\Http\JsonResponse
     {
         $milestone = Milestone::find($milestone);
 
@@ -145,11 +148,11 @@ class MilestoneController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @param  $milestone
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $milestone)
+    public function update(Request $request, $milestone): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'project_id' => 'required|integer',
@@ -157,6 +160,7 @@ class MilestoneController extends Controller
             'percentage_payment' => 'required|integer',
             'period' => 'required|integer',
             'description' => 'required',
+            'due_date' => 'required|date',
             'measure' => 'required|string|in:days,weeks,months,years'
         ]);
 
@@ -175,6 +179,7 @@ class MilestoneController extends Controller
             'period' => $request->period,
             'description' => $request->description,
             'measure' => $request->measure,
+            'due_date' => Carbon::parse($request->due_date)
         ]);
 
         return response()->json([
@@ -190,7 +195,7 @@ class MilestoneController extends Controller
      * @param  $milestone
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($milestone)
+    public function destroy($milestone): \Illuminate\Http\JsonResponse
     {
         $milestone = Milestone::find($milestone);
 

@@ -43,6 +43,16 @@ class User extends Authenticatable
         return $this->hasOne(Record::class);
     }
 
+    public function distributions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Distribution::class);
+    }
+
+    public function packages(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Distribution::class, 'distributionable');
+    }
+
     public function department()
     {
         return $this->record->department;
@@ -66,5 +76,25 @@ class User extends Authenticatable
     public function cashAdvance(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(CashAdvance::class);
+    }
+
+    public function requisitions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Requisition::class);
+    }
+
+    public function requisitionsApproved(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Requisition::class, 'approving_officer_id');
+    }
+
+    public function trainings(): \Illuminate\Database\Eloquent\Relations\MorphToMany
+    {
+        return $this->morphedByMany(Joining::class, 'userable');
+    }
+
+    public function commitments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Commitment::class);
     }
 }

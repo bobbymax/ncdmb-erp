@@ -26,9 +26,9 @@ class Project extends Model
         return $this->belongsTo(Department::class, 'department_id')->where('department_id', '>', 0);
     }
 
-    public function milestones(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function milestones(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
-        return $this->hasMany(Milestone::class);
+        return $this->morphMany(Milestone::class, 'milestoneable');
     }
 
     public function timeline(): \Illuminate\Database\Eloquent\Relations\MorphOne

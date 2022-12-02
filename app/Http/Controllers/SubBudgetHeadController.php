@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\SubBudgetHeadResource;
 use App\Models\SubBudgetHead;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +22,7 @@ class SubBudgetHeadController extends Controller
      */
     public function index()
     {
-        $subBudgetHeads = SubBudgetHead::with(['budgetHead', 'department', 'expenditures', 'fund'])->latest()->get();
+        $subBudgetHeads = SubBudgetHead::latest()->get();
 
         if ($subBudgetHeads->count() < 1) {
             return response()->json([
@@ -32,7 +33,7 @@ class SubBudgetHeadController extends Controller
         }
 
         return response()->json([
-            'data' => $subBudgetHeads,
+            'data' => SubBudgetHeadResource::collection($subBudgetHeads),
             'status' => 'success',
             'message' => 'Sub-Budget List'
         ], 200);
@@ -84,7 +85,7 @@ class SubBudgetHeadController extends Controller
         ]);
 
         return response()->json([
-            'data' => $subBudgetHead,
+            'data' => new SubBudgetHeadResource($subBudgetHead),
             'status' => 'success',
             'message' => 'Sub-Budget Head has been created successfully!'
         ], 201);
@@ -109,7 +110,7 @@ class SubBudgetHeadController extends Controller
         }
 
         return response()->json([
-            'data' => $subBudgetHead,
+            'data' => new SubBudgetHeadResource($subBudgetHead),
             'status' => 'success',
             'message' => 'Sub-Budget Head details'
         ], 200);
@@ -134,7 +135,7 @@ class SubBudgetHeadController extends Controller
         }
 
         return response()->json([
-            'data' => $subBudgetHead,
+            'data' => new SubBudgetHeadResource($subBudgetHead),
             'status' => 'success',
             'message' => 'Sub-Budget Head details'
         ], 200);
@@ -187,7 +188,7 @@ class SubBudgetHeadController extends Controller
         ]);
 
         return response()->json([
-            'data' => $subBudgetHead,
+            'data' => new SubBudgetHeadResource($subBudgetHead),
             'status' => 'success',
             'message' => 'Sub-Budget Head has been updated successfully!'
         ], 200);

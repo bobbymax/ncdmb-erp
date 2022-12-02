@@ -20,4 +20,14 @@ class Department extends Model
     {
         return $this->hasMany(Expenditure::class);
     }
+
+    public function requisitions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Requisition::class);
+    }
+
+    public function packages(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Distribution::class, 'distributionable');
+    }
 }

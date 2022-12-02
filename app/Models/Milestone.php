@@ -11,9 +11,9 @@ class Milestone extends Model
 
     protected $guarded = [''];
 
-    public function project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function milestoneable(): \Illuminate\Database\Eloquent\Relations\MorphTo
     {
-        return $this->belongsTo(Project::class, 'project_id');
+        return $this->morphTo();
     }
 
     public function timeline(): \Illuminate\Database\Eloquent\Relations\MorphOne

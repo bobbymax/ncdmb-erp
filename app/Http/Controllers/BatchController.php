@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BatchResource;
 use App\Models\Batch;
 use App\Models\Expenditure;
 use Illuminate\Http\JsonResponse;
@@ -34,7 +35,7 @@ class BatchController extends Controller
         }
 
         return response()->json([
-            'data' => $batches,
+            'data' => BatchResource::collection($batches),
             'status' => 'success',
             'message' => 'Batches list'
         ], 200);
@@ -63,6 +64,7 @@ class BatchController extends Controller
             'department_id' => 'required|integer',
             'amount' => 'required',
             'code' => 'required|string|unique:batches',
+            'sub_budget_head_code' => 'required|string',
             'no_of_payments' => 'required|integer',
             'stage' => 'required|string|max:255',
         ]);
@@ -79,6 +81,7 @@ class BatchController extends Controller
             'user_id' => auth()->user()->id,
             'department_id' => $request->department_id,
             'code' => $request->code,
+            'sub_budget_head_code' => $request->sub_budget_head_code,
             'amount' => $request->amount,
             'no_of_payments' => $request->no_of_payments,
             'stage' => $request->stage,
@@ -111,7 +114,7 @@ class BatchController extends Controller
         }
 
         return response()->json([
-            'data' => $batch,
+            'data' => new BatchResource($batch),
             'status' => 'success',
             'message' => 'Batch created successfully!'
         ], 201);
@@ -136,7 +139,7 @@ class BatchController extends Controller
         }
 
         return response()->json([
-            'data' => $batch,
+            'data' => new BatchResource($batch),
             'status' => 'success',
             'message' => 'Batch details'
         ], 200);
@@ -161,7 +164,7 @@ class BatchController extends Controller
         }
 
         return response()->json([
-            'data' => $batch,
+            'data' => new BatchResource($batch),
             'status' => 'success',
             'message' => 'Batch details'
         ], 200);

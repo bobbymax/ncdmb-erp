@@ -11,7 +11,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     // Login User In
     Route::post('login', 'AuthApiController@login');
 
-    // routes here
+    // Routes here
     Route::apiResource('addresses', 'AddressController');
     Route::apiResource('batches', 'BatchController');
     Route::apiResource('bids', 'BidController');
@@ -37,4 +37,23 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::apiResource('settings', 'SettingController');
     Route::apiResource('users', 'StaffController');
     Route::apiResource('timelines', 'TimelineController');
+    Route::apiResource('remunerations', 'RemunerationController');
+    Route::apiResource('settlements', 'SettlementController');
+
+    Route::apiResource('brands', 'BrandController');
+    Route::apiResource('classifications', 'ClassificationController');
+    Route::apiResource('categories', 'CategoryController');
+    Route::apiResource('products', 'ProductController');
+    Route::apiResource('requisitions', 'RequisitionController');
+    Route::apiResource('distributions', 'DistributionController');
+    Route::apiResource('items', 'ItemController');
+    Route::apiResource('stores', 'StoreController');
+
+    Route::apiResource('learningCategories', 'LearningCategoryController');
+    Route::apiResource('qualifications', 'QualificationController');
+    Route::apiResource('trainings', 'TrainingController');
+    Route::apiResource('joinings', 'JoiningController');
+
+    // Custom Routes
+    Route::post('verify/{training}', 'CustomRouteController@verifyTraining');
 });

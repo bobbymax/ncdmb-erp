@@ -15,14 +15,15 @@ return new class extends Migration
     {
         Schema::create('milestones', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('project_id')->unsigned();
-            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
             $table->text('description');
             $table->bigInteger('percentage_completion')->default(0);
             $table->bigInteger('percentage_payment')->default(0);
             $table->bigInteger('period')->default(0);
             $table->enum('measure', ['days', 'weeks', 'months', 'years'])->default('months');
+            $table->date('due_date')->nullable();
             $table->enum('status', ['pending', 'in-progress', 'overdue', 'completed'])->default('pending');
+            $table->bigInteger('milestoneable_id')->unsigned();
+            $table->string('milestoneable_type');
             $table->timestamps();
         });
     }

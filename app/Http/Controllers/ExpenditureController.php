@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ExpenditureResource;
 use App\Models\Expenditure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class ExpenditureController extends Controller
      */
     public function index()
     {
-        $expenditures = Expenditure::with(['batch', 'subBudgetHead'])->latest()->get();
+        $expenditures = Expenditure::with(['subBudgetHead'])->latest()->get();
 
         if ($expenditures->count() < 1) {
             return response()->json([
@@ -32,7 +33,7 @@ class ExpenditureController extends Controller
         }
 
         return response()->json([
-            'data' => $expenditures,
+            'data' => ExpenditureResource::collection($expenditures),
             'status' => 'success',
             'message' => 'Expenditure List'
         ], 200);
@@ -65,7 +66,6 @@ class ExpenditureController extends Controller
             'payment_type' => 'required|string|in:staff-payment,third-party',
             'type' => 'string|in:cash-advance,retirement,other',
             'amount' => 'required',
-            'new_balance' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -103,7 +103,7 @@ class ExpenditureController extends Controller
         }
 
         return response()->json([
-            'data' => $expenditure,
+            'data' => new ExpenditureResource($expenditure),
             'status' => 'success',
             'message' => 'Expenditure has been created successfully!'
         ], 201);
@@ -128,7 +128,7 @@ class ExpenditureController extends Controller
         }
 
         return response()->json([
-            'data' => $expenditure,
+            'data' => new ExpenditureResource($expenditure),
             'status' => 'success',
             'message' => 'Expenditure details'
         ], 200);
@@ -153,7 +153,7 @@ class ExpenditureController extends Controller
         }
 
         return response()->json([
-            'data' => $expenditure,
+            'data' => new ExpenditureResource($expenditure),
             'status' => 'success',
             'message' => 'Expenditure details'
         ], 200);

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ModuleResource;
 use App\Models\Module;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class ModuleController extends Controller
 {
@@ -31,7 +34,7 @@ class ModuleController extends Controller
         }
 
         return response()->json([
-            'data' => $modules,
+            'data' => ModuleResource::collection($modules),
             'status' => 'success',
             'message' => 'Modules List'
         ], 200);
@@ -58,9 +61,10 @@ class ModuleController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255',
-            'path' => 'required|string',
+            'url' => 'required|string',
             'type' => 'required|string|in:application,module,page',
             'parentId' => 'required',
+            'roles' => 'required|array'
         ]);
 
         if ($validator->fails()) {
@@ -82,8 +86,25 @@ class ModuleController extends Controller
             'type' => $request->type,
         ]);
 
+        if (! $module) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Something went wrong!!'
+            ], 500);
+        }
+
+        if ($request->roles) {
+            foreach($request->roles as $roleId) {
+                $role = Role::find($roleId);
+                if ($role) {
+                    $module->roles()->save($role);
+                }
+            }
+        }
+
         return response()->json([
-            'data' => $module,
+            'data' => new ModuleResource($module),
             'status' => 'success',
             'message' => 'Module Created Successfully!'
         ], 201);
@@ -108,7 +129,7 @@ class ModuleController extends Controller
         }
 
         return response()->json([
-            'data' => $module,
+            'data' => new ModuleResource($module),
             'status' => 'success',
             'message' => 'Module Details'
         ], 200);
@@ -133,7 +154,7 @@ class ModuleController extends Controller
         }
 
         return response()->json([
-            'data' => $module,
+            'data' => new ModuleResource($module),
             'status' => 'success',
             'message' => 'Module Details'
         ], 200);
@@ -151,7 +172,7 @@ class ModuleController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255',
-            'path' => 'required|string',
+            'url' => 'required|string',
             'type' => 'required|string|in:application,module,page',
             'parentId' => 'required',
         ]);
@@ -186,7 +207,7 @@ class ModuleController extends Controller
         ]);
 
         return response()->json([
-            'data' => $module,
+            'data' => new ModuleResource($module),
             'status' => 'success',
             'message' => 'Module updated successfully!'
         ], 200);

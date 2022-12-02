@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FundResource;
 use App\Models\Fund;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,7 +33,7 @@ class FundController extends Controller
         }
 
         return response()->json([
-            'data' => $funds,
+            'data' => FundResource::collection($funds),
             'status' => 'success',
             'message' => 'Sub-Budget Credit Lists'
         ], 200);
@@ -58,7 +59,8 @@ class FundController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'sub_budget_head_id' => 'required|integer',
-            'approved_amount' => 'required|integer'
+            'approved_amount' => 'required|integer',
+            'year' => 'required|integer'
         ]);
 
         if ($validator->fails()) {
@@ -74,11 +76,11 @@ class FundController extends Controller
             'approved_amount' => $request->approved_amount,
             'actual_balance' => $request->approved_amount,
             'booked_balance' => $request->approved_amount,
-            'year' => 2022
+            'year' => $request->year
         ]);
 
         return response()->json([
-            'data' => $fund,
+            'data' => new FundResource($fund),
             'status' => 'success',
             'message' => 'Funds have been added to this Sub-Budget successfully!'
         ], 201);
@@ -101,7 +103,7 @@ class FundController extends Controller
             ], 422);
         }
         return response()->json([
-            'data' => $fund,
+            'data' => new FundResource($fund),
             'status' => 'success',
             'message' => 'Sub-Budget details'
         ], 200);
@@ -124,7 +126,7 @@ class FundController extends Controller
             ], 422);
         }
         return response()->json([
-            'data' => $fund,
+            'data' => new FundResource($fund),
             'status' => 'success',
             'message' => 'Sub-Budget details'
         ], 200);
@@ -170,7 +172,7 @@ class FundController extends Controller
         ]);
 
         return response()->json([
-            'data' => $fund,
+            'data' => new FundResource($fund),
             'status' => 'success',
             'message' => 'Funds have been updated to this Sub-Budget successfully!'
         ], 200);

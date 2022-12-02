@@ -75,7 +75,7 @@ class RoleController extends Controller
             'name' => $request->name,
             'label' => Str::slug($request->name),
             'slots' => $request->slots,
-            'start' => Carbon::parse($request->start),
+            'start' => $request->start != null ? Carbon::parse($request->start) : null,
             'expire' => $request->expire != null ? Carbon::parse($request->expire) : null,
             'isSuper' => $request->isSuper,
             'no_expiration' => $request->no_expiration,

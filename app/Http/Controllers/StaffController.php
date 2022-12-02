@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\Record;
 use App\Models\Role;
 use App\Models\User;
@@ -39,7 +40,7 @@ class StaffController extends Controller
         }
 
         return response()->json([
-            'data' => $users,
+            'data' => UserResource::collection($users),
             'status' => 'success',
             'message' => 'User List'
         ], 200);
@@ -141,7 +142,7 @@ class StaffController extends Controller
         $user->roles()->save($this->role);
 
         return response()->json([
-            'data' => $user,
+            'data' => new UserResource($user),
             'status' => 'success',
             'message' => 'Staff Record Created Successfully!'
         ], 200);
@@ -166,7 +167,7 @@ class StaffController extends Controller
         }
 
         return response()->json([
-            'data' => $user,
+            'data' => new UserResource($user),
             'status' => 'success',
             'message' => 'User Details'
         ], 200);
@@ -191,7 +192,7 @@ class StaffController extends Controller
         }
 
         return response()->json([
-            'data' => $user,
+            'data' => new UserResource($user),
             'status' => 'success',
             'message' => 'User Details'
         ], 200);
@@ -239,7 +240,7 @@ class StaffController extends Controller
         ]);
 
         return response()->json([
-            'data' => $user,
+            'data' => new UserResource($user),
             'status' => 'success',
             'message' => 'User details updated successfully!!'
         ], 200);
