@@ -20,7 +20,7 @@ class ExpenditureController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $expenditures = Expenditure::with(['subBudgetHead'])->latest()->get();
 
@@ -55,7 +55,7 @@ class ExpenditureController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'sub_budget_head_id' => 'required|integer',
@@ -79,7 +79,7 @@ class ExpenditureController extends Controller
         $expenditure = Expenditure::create([
             'sub_budget_head_id' => $request->sub_budget_head_id,
             'department_id' => $request->department_id,
-            'cash_advance_id' => $request->cash_advance_id,
+            'claim_id' => $request->claim_id,
             'user_id' => auth()->user()->id,
             'type' => $request->type,
             'payment_type' => $request->payment_type,
@@ -96,7 +96,7 @@ class ExpenditureController extends Controller
             $fund->booked_balance -= $expenditure->amount;
             $fund->save();
 
-            if ($expenditure->cash_advance_id > 0) {
+            if ($expenditure->claim_id > 0) {
                 $expenditure->advance->status = "cleared";
                 $expenditure->advance->save();
             }
@@ -112,10 +112,10 @@ class ExpenditureController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Expenditure $expenditure
+     * @param $expenditure
      * @return JsonResponse
      */
-    public function show($expenditure)
+    public function show($expenditure): JsonResponse
     {
         $expenditure = Expenditure::find($expenditure);
 
@@ -137,10 +137,10 @@ class ExpenditureController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param Expenditure $expenditure
+     * @param $expenditure
      * @return JsonResponse
      */
-    public function edit($expenditure)
+    public function edit($expenditure): JsonResponse
     {
         $expenditure = Expenditure::find($expenditure);
 
@@ -162,11 +162,11 @@ class ExpenditureController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param Expenditure $expenditure
+     * @param  Request  $request
+     * @param $expenditure
      * @return JsonResponse
      */
-    public function update(Request $request, $expenditure)
+    public function update(Request $request, $expenditure): JsonResponse
     {
         //
     }
@@ -174,10 +174,10 @@ class ExpenditureController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param Expenditure $expenditure
+     * @param $expenditure
      * @return JsonResponse
      */
-    public function destroy($expenditure)
+    public function destroy($expenditure): JsonResponse
     {
         $expenditure = Expenditure::find($expenditure);
 

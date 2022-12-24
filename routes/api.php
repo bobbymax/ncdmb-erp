@@ -54,6 +54,15 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::apiResource('trainings', 'TrainingController');
     Route::apiResource('joinings', 'JoiningController');
 
+    Route::apiResource('commitments', 'CommitmentController');
+    Route::apiResource('targets', 'TargetController');
+    Route::apiResource('pillars', 'PillarController');
+    Route::apiResource('responsibilities', 'ResponsibilityController');
+    Route::apiResource('tasks', 'TaskController');
+
+    Route::apiResource('claims', 'ClaimController');
+    Route::apiResource('expenses', 'ExpenseController');
+
     // Custom Routes
     Route::post('verify/{training}', 'CustomRouteController@verifyTraining');
 });

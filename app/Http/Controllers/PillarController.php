@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Milestone;
-use App\Models\Timeline;
-use Carbon\Carbon;
+use App\Models\Pillar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
-class MilestoneController extends Controller
+class PillarController extends Controller
 {
     public function __construct()
     {
@@ -22,9 +21,9 @@ class MilestoneController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $milestones = Milestone::latest()->get();
+        $pillars = Pillar::latest()->get();
 
-        if ($milestones->count() < 1) {
+        if ($pillars->count() < 1) {
             return response()->json([
                 'data' => [],
                 'status' => 'info',
@@ -33,9 +32,9 @@ class MilestoneController extends Controller
         }
 
         return response()->json([
-            'data' => $milestones,
+            'data' => $pillars,
             'status' => 'success',
-            'message' => 'Tasks List'
+            'message' => 'List of Pillars'
         ], 200);
     }
 
@@ -58,12 +57,8 @@ class MilestoneController extends Controller
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'percentage_completion' => 'required|integer',
-            'percentage_payment' => 'required|integer',
-            'period' => 'required|integer',
-            'description' => 'required',
-            'due_date' => 'required|date',
-            'measure' => 'required|string|in:days,weeks,months,years'
+            'name' => 'required|string|max:255',
+            'description' => 'required|min:4',
         ]);
 
         if ($validator->fails()) {
@@ -74,36 +69,30 @@ class MilestoneController extends Controller
             ], 500);
         }
 
-        $milestone = Milestone::create([
-            'percentage_completion' => $request->percentage_completion,
-            'percentage_payment' => $request->percentage_payment,
-            'period' => $request->period,
+        $pillar = Pillar::create([
+            'name' => $request->name,
+            'label' => Str::slug($request->name),
             'description' => $request->description,
-            'measure' => $request->measure,
-            'due_date' => Carbon::parse($request->due_date)
         ]);
 
-        $timeline = new Timeline;
-        $milestone->timeline()->save($timeline);
-
         return response()->json([
-            'data' => $milestone,
+            'data' => $pillar,
             'status' => 'success',
-            'message' => 'Milestone Details have been created successfully!!'
+            'message' => 'Pillar created successfully!!'
         ], 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  $milestone
+     * @param  $pillar
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($milestone): \Illuminate\Http\JsonResponse
+    public function show($pillar): \Illuminate\Http\JsonResponse
     {
-        $milestone = Milestone::find($milestone);
+        $pillar = Pillar::find($pillar);
 
-        if (! $milestone) {
+        if (! $pillar) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
@@ -112,23 +101,23 @@ class MilestoneController extends Controller
         }
 
         return response()->json([
-            'data' => $milestone,
+            'data' => $pillar,
             'status' => 'success',
-            'message' => 'Milestone details'
+            'message' => 'Pillar details'
         ], 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  $milestone
+     * @param  $pillar
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($milestone): \Illuminate\Http\JsonResponse
+    public function edit($pillar): \Illuminate\Http\JsonResponse
     {
-        $milestone = Milestone::find($milestone);
+        $pillar = Pillar::find($pillar);
 
-        if (! $milestone) {
+        if (! $pillar) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
@@ -137,9 +126,9 @@ class MilestoneController extends Controller
         }
 
         return response()->json([
-            'data' => $milestone,
+            'data' => $pillar,
             'status' => 'success',
-            'message' => 'Milestone details'
+            'message' => 'Pillar details'
         ], 200);
     }
 
@@ -147,18 +136,14 @@ class MilestoneController extends Controller
      * Update the specified resource in storage.
      *
      * @param  Request  $request
-     * @param  $milestone
+     * @param  $pillar
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $milestone): \Illuminate\Http\JsonResponse
+    public function update(Request $request, $pillar): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'percentage_completion' => 'required|integer',
-            'percentage_payment' => 'required|integer',
-            'period' => 'required|integer',
-            'description' => 'required',
-            'due_date' => 'required|date',
-            'measure' => 'required|string|in:days,weeks,months,years'
+            'name' => 'required|string|max:255',
+            'description' => 'required|min:4',
         ]);
 
         if ($validator->fails()) {
@@ -169,33 +154,9 @@ class MilestoneController extends Controller
             ], 500);
         }
 
-        $milestone->update([
-            'percentage_completion' => $request->percentage_completion,
-            'percentage_payment' => $request->percentage_payment,
-            'period' => $request->period,
-            'description' => $request->description,
-            'measure' => $request->measure,
-            'due_date' => Carbon::parse($request->due_date)
-        ]);
+        $pillar = Pillar::find($pillar);
 
-        return response()->json([
-            'data' => $milestone,
-            'status' => 'success',
-            'message' => 'Milestone Details have been updated successfully!!'
-        ], 200);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  $milestone
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy($milestone): \Illuminate\Http\JsonResponse
-    {
-        $milestone = Milestone::find($milestone);
-
-        if (! $milestone) {
+        if (! $pillar) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
@@ -203,13 +164,44 @@ class MilestoneController extends Controller
             ], 422);
         }
 
-        $old = $milestone;
-        $milestone->delete();
+        $pillar->update([
+            'name' => $request->name,
+            'label' => Str::slug($request->name),
+            'description' => $request->description,
+        ]);
+
+        return response()->json([
+            'data' => $pillar,
+            'status' => 'success',
+            'message' => 'Pillar updated successfully!!'
+        ], 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  $pillar
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($pillar): \Illuminate\Http\JsonResponse
+    {
+        $pillar = Pillar::find($pillar);
+
+        if (! $pillar) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid ID entered'
+            ], 422);
+        }
+
+        $old = $pillar;
+        $pillar->delete();
 
         return response()->json([
             'data' => $old,
             'status' => 'success',
-            'message' => 'Milestone Details have been updated successfully!!'
+            'message' => 'Pillar deleted successfully!!'
         ], 200);
     }
 }

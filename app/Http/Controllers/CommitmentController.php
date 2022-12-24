@@ -60,6 +60,7 @@ class CommitmentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'targets' => 'required|array',
+            'status' => 'required|string|in:pending,department-head,hr,alter,approved,denied'
         ]);
 
         if ($validator->fails()) {
@@ -72,6 +73,7 @@ class CommitmentController extends Controller
 
         $commitment = Commitment::create([
             'user_id' => auth()->user()->id,
+            'status' => $request->status
         ]);
 
         if (! $commitment) {
@@ -96,7 +98,6 @@ class CommitmentController extends Controller
                     $milestone = new Milestone;
                     $milestone->description = $value['description'];
                     $milestone->percentage_completion = $value['percentage_completion'];
-                    $milestone->period = $value['period'];
                     $milestone->due_date = Carbon::parse($value['due_date']);
 
                     $target->milestones()->save($milestone);

@@ -29,13 +29,13 @@ class SubBudgetHeadResource extends JsonResource
             "type" => $this->type,
             "status" => $this->status,
             "logistics" => $this->logistics,
-            "approved_amount" => $this->fund->approved_amount,
-            "booked_expenditure" => $this->fund->booked_expenditure,
-            "actual_expenditure" => $this->fund->actual_expenditure,
-            "booked_balance" => $this->fund->booked_balance,
-            "actual_balance" => $this->fund->actual_balance,
-            "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at,
+            "approved_amount" => $this->fund !== null ? $this->fund->approved_amount : 0,
+            "booked_expenditure" => $this->fund !== null ? $this->fund->booked_expenditure : 0,
+            "actual_expenditure" => $this->fund !== null ? $this->fund->actual_expenditure : 0,
+            "booked_balance" => $this->fund !== null ? $this->fund->booked_balance : 0,
+            "actual_balance" => $this->fund !== null ? $this->fund->actual_balance : 0,
+            "created_at" => $this->created_at->format('d F, Y'),
+            "updated_at" => $this->updated_at->format('d F, Y'),
         ];
     }
 }

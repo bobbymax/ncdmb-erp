@@ -30,4 +30,14 @@ class Department extends Model
     {
         return $this->morphMany(Distribution::class, 'distributionable');
     }
+
+    public function responsibilities(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Responsibility::class);
+    }
+
+    public function tasks(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Task::class, 'taskable');
+    }
 }

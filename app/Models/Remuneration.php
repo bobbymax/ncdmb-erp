@@ -25,4 +25,9 @@ class Remuneration extends Model
     {
         return $this->hasMany(Remuneration::class, 'parentId');
     }
+
+    public function expenses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
 }

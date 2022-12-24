@@ -93,8 +93,18 @@ class User extends Authenticatable
         return $this->morphedByMany(Joining::class, 'userable');
     }
 
+    public function tasks(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Task::class, 'taskable');
+    }
+
     public function commitments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Commitment::class);
+    }
+
+    public function controlledTasks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 }

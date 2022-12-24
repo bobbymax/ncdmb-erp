@@ -23,7 +23,7 @@ class Expenditure extends Model
 
     public function advance(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(CashAdvance::class, 'cash_advance_id')->where('cash_advance_id', '>', 0);
+        return $this->belongsTo(CashAdvance::class, 'claim_id')->where('claim_id', '>', 0);
     }
 
     public function subBudgetHead(): \Illuminate\Database\Eloquent\Relations\BelongsTo

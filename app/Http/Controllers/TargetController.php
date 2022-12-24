@@ -116,45 +116,129 @@ class TargetController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Target  $target
-     * @return \Illuminate\Http\Response
+     * @param  $target
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Target $target)
+    public function show($target): \Illuminate\Http\JsonResponse
     {
-        //
+        $target = Target::find($target);
+
+        if (! $target) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid token'
+            ], 422);
+        }
+
+        return response()->json([
+            'data' => $target,
+            'status' => 'success',
+            'message' => 'Target Details'
+        ], 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Target  $target
-     * @return \Illuminate\Http\Response
+     * @param  $target
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function edit(Target $target)
+    public function edit($target): \Illuminate\Http\JsonResponse
     {
-        //
+        $target = Target::find($target);
+
+        if (! $target) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid token'
+            ], 422);
+        }
+
+        return response()->json([
+            'data' => $target,
+            'status' => 'success',
+            'message' => 'Target Details'
+        ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Target  $target
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @param  $target
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Target $target)
+    public function update(Request $request, $target): \Illuminate\Http\JsonResponse
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'commitment_id' => 'required|integer',
+            'objectives' => 'required|min:5',
+            'measure' => 'required|min:5',
+            'weight' => 'required|integer',
+            'target' => 'required|integer',
+            'milestones' => 'required|array'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => $validator->errors(),
+                'status' => 'error',
+                'message' => 'Please fix the following error(s):'
+            ], 500);
+        }
+
+        $target = Target::find($target);
+
+        if (! $target) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid token chosen'
+            ], 422);
+        }
+
+        $target->update([
+            'commitment_id' => $request->commitment_id,
+            'objectives' => $request->objectives,
+            'measure' => $request->measure,
+            'weight' => $request->weight,
+            'target' => $request->target,
+        ]);
+
+        return response()->json([
+            'data' => $target,
+            'status' => 'success',
+            'message' => 'Target updated successfully!!'
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Target  $target
-     * @return \Illuminate\Http\Response
+     * @param  $target
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Target $target)
+    public function destroy($target): \Illuminate\Http\JsonResponse
     {
-        //
+        $target = Target::find($target);
+
+        if (! $target) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid token'
+            ], 422);
+        }
+
+        $old = $target;
+        $target->delete();
+
+        return response()->json([
+            'data' => $old,
+            'status' => 'success',
+            'message' => 'Target Deleted Successfully!'
+        ], 200);
     }
 }

@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Models\Milestone;
+use App\Models\Responsibility;
+use App\Models\Target;
+use App\Models\Task;
 use App\Models\Timeline;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class MilestoneController extends Controller
+class TaskController extends Controller
 {
+    protected $taskable;
+
     public function __construct()
     {
         $this->middleware('auth:api');
     }
-
     /**
      * Display a listing of the resource.
      *
@@ -22,9 +28,9 @@ class MilestoneController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $milestones = Milestone::latest()->get();
+        $tasks = Task::latest()->get();
 
-        if ($milestones->count() < 1) {
+        if ($tasks->count() < 1) {
             return response()->json([
                 'data' => [],
                 'status' => 'info',
@@ -33,9 +39,9 @@ class MilestoneController extends Controller
         }
 
         return response()->json([
-            'data' => $milestones,
+            'data' => $tasks,
             'status' => 'success',
-            'message' => 'Tasks List'
+            'message' => 'List of Tasks'
         ], 200);
     }
 
@@ -58,12 +64,11 @@ class MilestoneController extends Controller
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'percentage_completion' => 'required|integer',
-            'percentage_payment' => 'required|integer',
-            'period' => 'required|integer',
-            'description' => 'required',
+            'description' => 'required|min:4',
             'due_date' => 'required|date',
-            'measure' => 'required|string|in:days,weeks,months,years'
+            'priority' => 'required|string|in:low,medium,high,very-high',
+            'taskable_id' => 'required|integer',
+            'taskable_type' => 'required|string|in:project,responsibility,department,staff',
         ]);
 
         if ($validator->fails()) {
@@ -74,36 +79,48 @@ class MilestoneController extends Controller
             ], 500);
         }
 
-        $milestone = Milestone::create([
-            'percentage_completion' => $request->percentage_completion,
-            'percentage_payment' => $request->percentage_payment,
-            'period' => $request->period,
-            'description' => $request->description,
-            'measure' => $request->measure,
-            'due_date' => Carbon::parse($request->due_date)
-        ]);
+        $this->taskable = $this->getHolder($request->taskable_type, $request->taskable_id);
+
+        $task = new Task;
+        $task->user_id = auth()->user()->id;
+        $task->due_date = Carbon::parse($request->due_date);
+        $task->description = $request->description;
+        $task->priority = $request->priority;
+        $this->taskable->tasks()->save($task);
+
 
         $timeline = new Timeline;
-        $milestone->timeline()->save($timeline);
+        $task->timeline()->save($timeline);
 
         return response()->json([
-            'data' => $milestone,
+            'data' => $task,
             'status' => 'success',
-            'message' => 'Milestone Details have been created successfully!!'
+            'message' => 'Task created successfully!!'
         ], 201);
+    }
+
+    public function getHolder($type, $id)
+    {
+        return match ($type) {
+            "responsibility" => Responsibility::find($id),
+            "department" => Department::find($id),
+            "target" => Target::find($id),
+            "milestone" => Milestone::find($id),
+            default => User::find($id)
+        };
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  $milestone
+     * @param  $task
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($milestone): \Illuminate\Http\JsonResponse
+    public function show($task): \Illuminate\Http\JsonResponse
     {
-        $milestone = Milestone::find($milestone);
+        $task = Task::find($task);
 
-        if (! $milestone) {
+        if (! $task) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
@@ -112,23 +129,23 @@ class MilestoneController extends Controller
         }
 
         return response()->json([
-            'data' => $milestone,
+            'data' => $task,
             'status' => 'success',
-            'message' => 'Milestone details'
+            'message' => 'Task details'
         ], 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  $milestone
+     * @param  $task
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($milestone): \Illuminate\Http\JsonResponse
+    public function edit($task): \Illuminate\Http\JsonResponse
     {
-        $milestone = Milestone::find($milestone);
+        $task = Task::find($task);
 
-        if (! $milestone) {
+        if (! $task) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
@@ -137,9 +154,9 @@ class MilestoneController extends Controller
         }
 
         return response()->json([
-            'data' => $milestone,
+            'data' => $task,
             'status' => 'success',
-            'message' => 'Milestone details'
+            'message' => 'Task details'
         ], 200);
     }
 
@@ -147,18 +164,15 @@ class MilestoneController extends Controller
      * Update the specified resource in storage.
      *
      * @param  Request  $request
-     * @param  $milestone
+     * @param  $task
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $milestone): \Illuminate\Http\JsonResponse
+    public function update(Request $request, $task): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'percentage_completion' => 'required|integer',
-            'percentage_payment' => 'required|integer',
-            'period' => 'required|integer',
-            'description' => 'required',
+            'description' => 'required|min:4',
             'due_date' => 'required|date',
-            'measure' => 'required|string|in:days,weeks,months,years'
+            'priority' => 'required|string|in:low,medium,high,very-high',
         ]);
 
         if ($validator->fails()) {
@@ -169,33 +183,9 @@ class MilestoneController extends Controller
             ], 500);
         }
 
-        $milestone->update([
-            'percentage_completion' => $request->percentage_completion,
-            'percentage_payment' => $request->percentage_payment,
-            'period' => $request->period,
-            'description' => $request->description,
-            'measure' => $request->measure,
-            'due_date' => Carbon::parse($request->due_date)
-        ]);
+        $task = Task::find($task);
 
-        return response()->json([
-            'data' => $milestone,
-            'status' => 'success',
-            'message' => 'Milestone Details have been updated successfully!!'
-        ], 200);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  $milestone
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy($milestone): \Illuminate\Http\JsonResponse
-    {
-        $milestone = Milestone::find($milestone);
-
-        if (! $milestone) {
+        if (! $task) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
@@ -203,13 +193,44 @@ class MilestoneController extends Controller
             ], 422);
         }
 
-        $old = $milestone;
-        $milestone->delete();
+        $task->due_date = Carbon::parse($request->due_date);
+        $task->description = $request->description;
+        $task->priority = $request->priority;
+        $task->save();
+
+        return response()->json([
+            'data' => $task,
+            'status' => 'success',
+            'message' => 'Task updated successfully!!'
+        ], 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  $task
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($task): \Illuminate\Http\JsonResponse
+    {
+        $task = Task::find($task);
+
+        if (! $task) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid ID entered'
+            ], 422);
+        }
+
+        $old = $task;
+        $task->timeline()->delete();
+        $task->delete();
 
         return response()->json([
             'data' => $old,
             'status' => 'success',
-            'message' => 'Milestone Details have been updated successfully!!'
+            'message' => 'Task deleted successfully!!'
         ], 200);
     }
 }

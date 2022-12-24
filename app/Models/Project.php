@@ -45,4 +45,9 @@ class Project extends Model
     {
         return $this->hasMany(Bid::class);
     }
+
+    public function tasks(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Task::class, 'taskable');
+    }
 }
