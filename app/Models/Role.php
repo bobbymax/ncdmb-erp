@@ -11,17 +11,17 @@ class Role extends Model
 
     protected $guarded = [''];
 
-    public function permissions()
+    public function permissions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Permission::class);
     }
 
-    public function staff()
+    public function staff(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {
         return $this->morphedByMany(User::class, 'roleable');
     }
 
-    public function modules()
+    public function modules(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {
         return $this->morphedByMany(Module::class, 'roleable');
     }

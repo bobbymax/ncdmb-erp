@@ -22,7 +22,7 @@ class BatchController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $batches = Batch::latest()->get();
 
@@ -57,7 +57,7 @@ class BatchController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'expenditures' => 'required|array',
@@ -123,10 +123,10 @@ class BatchController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Batch $batch
+     * @param $batch
      * @return JsonResponse
      */
-    public function show($batch)
+    public function show($batch): JsonResponse
     {
         $batch = Batch::find($batch);
 
@@ -146,12 +146,37 @@ class BatchController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Display the specified resource.
      *
-     * @param Batch $batch
+     * @param $batch
      * @return JsonResponse
      */
-    public function edit($batch)
+    public function collectBatch($batch): JsonResponse
+    {
+        $batch = Batch::where('code', $batch)->first();
+
+        if (! $batch) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Batch with this code was not found!!!'
+            ], 422);
+        }
+
+        return response()->json([
+            'data' => new BatchResource($batch),
+            'status' => 'success',
+            'message' => 'Batch details'
+        ], 200);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param $batch
+     * @return JsonResponse
+     */
+    public function edit($batch): JsonResponse
     {
         $batch = Batch::find($batch);
 
@@ -185,10 +210,10 @@ class BatchController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param Batch $batch
+     * @param $batch
      * @return JsonResponse
      */
-    public function destroy($batch)
+    public function destroy($batch): JsonResponse
     {
         $batch = Batch::find($batch);
 
@@ -213,9 +238,9 @@ class BatchController extends Controller
             $expenditure->batch_id = 0;
             $expenditure->save();
 
-            if ($expenditure->advance !== null) {
-                $expenditure->advance->status = "registered";
-                $expenditure->advance->save();
+            if ($expenditure->claim !== null) {
+                $expenditure->claim->status = "registered";
+                $expenditure->claim->save();
             }
         }
 

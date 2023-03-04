@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Expenditure extends Model
+class Refund extends Model
 {
     use HasFactory;
 
@@ -14,11 +14,6 @@ class Expenditure extends Model
     public function controller(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function claim(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Claim::class, 'claim_id');
     }
 
     public function department(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -31,18 +26,8 @@ class Expenditure extends Model
         return $this->belongsTo(SubBudgetHead::class, 'sub_budget_head_id');
     }
 
-    public function batch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function expenditure(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Batch::class, 'batch_id');
-    }
-
-    public function refunds(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Refund::class);
-    }
-
-    public function fund()
-    {
-        return $this->subBudgetHead->fund;
+        return $this->belongsTo(Expenditure::class, 'expenditure_id');
     }
 }

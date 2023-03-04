@@ -97,8 +97,8 @@ class ExpenditureController extends Controller
             $fund->save();
 
             if ($expenditure->claim_id > 0) {
-                $expenditure->advance->status = "cleared";
-                $expenditure->advance->save();
+                $expenditure->claim->status = "cleared";
+                $expenditure->claim->save();
             }
         }
 
@@ -160,6 +160,130 @@ class ExpenditureController extends Controller
     }
 
     /**
+     * @param Request $request
+     * @param $expenditure
+     *
+     * Clear Expenditure Payments
+     *
+     * @return JsonResponse
+     */
+    public function clearPayment(Request $request, $expenditure): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|string|in:pending,cleared,paid',
+            'approval_status' => 'required|string|in:pending,cleared,resolved',
+            'stage' => 'required|string|in:budget-office,treasury,audit,accounts',
+            'level' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => $validator->errors(),
+                'status' => 'error',
+                'message' => 'Please fix the following error(s):'
+            ], 500);
+        }
+
+        $expenditure = Expenditure::find($expenditure);
+
+        if (! $expenditure) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid ID entered'
+            ], 422);
+        }
+
+        $expenditure->update([
+            'status' => $request->status,
+            'approval_status' => $request->approval_status,
+            'stage' => $request->stage,
+            'level' => $request->level
+        ]);
+
+        $batch = $expenditure->batch;
+        $expCount = $batch->expenditures->count();
+        $exps = $batch->expenditures->where('approval_status', 'cleared');
+        $expsPaid = $batch->expenditures->where('status', 'paid');
+
+        if ($expCount == $exps->count()) {
+            $batch->update([
+                'status' => 'registered',
+                'stage' => $request->stage
+            ]);
+        }
+
+        if ($expCount == $expsPaid->count()) {
+            $batch->update([
+                'status' => 'paid'
+            ]);
+        }
+
+        if ($expenditure->status === "paid") {
+            $fund = $expenditure->subBudgetHead->fund;
+            $fund->actual_expenditure += $expenditure->amount;
+            $fund->actual_balance -= $expenditure->amount;
+            $fund->save();
+
+            if ($expenditure->claim_id > 0) {
+                $claim = $expenditure->claim;
+
+                $claim->status = "paid";
+                $claim->save();
+            }
+        }
+
+        $status = $expenditure->status === "paid" ? "paid" : "cleared";
+
+        return response()->json([
+            'data' => new ExpenditureResource($expenditure),
+            'status' => 'success',
+            'message' => 'Expenditure has been marked as ' . $status . "!!!"
+        ], 200);
+    }
+
+    public function queryExpenditure(Request $request, $expenditure): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|string|in:pending,cleared,queried',
+            'approval_status' => 'required|string|in:cleared,queried,resolved',
+            'stage' => 'required|string|in:budget-office,treasury,audit',
+            'remark' => 'required|string|min:3'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => $validator->errors(),
+                'status' => 'error',
+                'message' => 'Please fix the following error(s):'
+            ], 500);
+        }
+
+        $expenditure = Expenditure::find($expenditure);
+
+        if (! $expenditure) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid ID entered'
+            ], 422);
+        }
+
+        $expenditure->update([
+            'status' => $request->status,
+            'approval_status' => $request->approval_status,
+            'stage' => $request->stage,
+            'remark' => $request->remark
+        ]);
+
+        return response()->json([
+            'data' => new ExpenditureResource($expenditure),
+            'status' => 'success',
+            'message' => 'Expenditure details'
+        ], 200);
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param  Request  $request
@@ -168,7 +292,70 @@ class ExpenditureController extends Controller
      */
     public function update(Request $request, $expenditure): JsonResponse
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => $validator->errors(),
+                'status' => 'error',
+                'message' => 'Please fix the following error(s):'
+            ], 500);
+        }
+
+        $expenditure = Expenditure::find($expenditure);
+
+        if (! $expenditure) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid ID entered'
+            ], 422);
+        }
+
+        $fund = $expenditure->subBudgetHead->fund;
+
+        if ($expenditure->amount > $request->amount) {
+            $diff = $expenditure->amount - $request->amount;
+
+            if ($fund->booked_balance < $diff) {
+                return response()->json([
+                    'data' => null,
+                    'status' => 'warning',
+                    'message' => 'There are no funds on this budget head!!!'
+                ], 422);
+            }
+
+            $fund->booked_expenditure += $diff;
+            $fund->booked_balance -= $diff;
+            $fund->save();
+
+        } else if ($expenditure->amount < $request->amount) {
+
+            $diff = $request->amount - $expenditure->amount;
+
+            $fund->booked_expenditure -= $diff;
+            $fund->booked_balance += $diff;
+            $fund->save();
+
+        } else {
+            return response()->json([
+                'data' => new ExpenditureResource($expenditure),
+                'status' => 'info',
+                'message' => 'Amount is the same, so not update was rendered!!'
+            ], 200);
+        }
+
+        $expenditure->update([
+            'amount' => $request->amount,
+        ]);
+
+        return response()->json([
+            'data' => new ExpenditureResource($expenditure),
+            'status' => 'success',
+            'message' => 'Expenditure has been updated successfully!!'
+        ], 200);
     }
 
     /**

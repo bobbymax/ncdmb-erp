@@ -11,9 +11,24 @@ class Department extends Model
 
     protected $guarded = [''];
 
-    public function records(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function staff(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Record::class);
+        return $this->hasMany(User::class);
+    }
+
+    public function demands(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Demand::class);
+    }
+
+    public function parent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'parentId');
+    }
+
+    public function directorate(): string
+    {
+        return $this->type === "directorate" ? $this->name : $this->parent->where('type', 'directorate')->name;
     }
 
     public function expenditures(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -39,5 +54,15 @@ class Department extends Model
     public function tasks(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
         return $this->morphMany(Task::class, 'taskable');
+    }
+
+    public function advances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TouringAdvance::class);
+    }
+
+    public function refunds(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Refund::class);
     }
 }

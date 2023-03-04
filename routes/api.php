@@ -39,6 +39,8 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::apiResource('timelines', 'TimelineController');
     Route::apiResource('remunerations', 'RemunerationController');
     Route::apiResource('settlements', 'SettlementController');
+    Route::apiResource('demands', 'DemandController');
+    Route::apiResource('refunds', 'RefundController');
 
     Route::apiResource('brands', 'BrandController');
     Route::apiResource('classifications', 'ClassificationController');
@@ -59,10 +61,18 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::apiResource('pillars', 'PillarController');
     Route::apiResource('responsibilities', 'ResponsibilityController');
     Route::apiResource('tasks', 'TaskController');
-
     Route::apiResource('claims', 'ClaimController');
+    Route::apiResource('touringAdvances', 'TouringAdvanceController');
     Route::apiResource('expenses', 'ExpenseController');
 
     // Custom Routes
     Route::post('verify/{training}', 'CustomRouteController@verifyTraining');
+    Route::get('fetch/claims/{claim}', 'ClaimController@fetchClaim');
+    Route::get('collect/batches/{batch}', 'BatchController@collectBatch');
+    Route::post('assign/roles', 'StaffController@assignRole');
+    Route::patch('reset/password/{user}', 'StaffController@passwordReset');
+    Route::patch('query/expenditures/{expenditure}', 'ExpenditureController@queryExpenditure');
+    Route::patch('clear/expenditures/{expenditure}', 'ExpenditureController@clearPayment');
+    Route::patch('response/demands/{demand}', 'DemandController@reversalResponse');
+    Route::patch('fulfill/refunds/{refund}', 'RefundController@fulfillRefundRequest');
 });

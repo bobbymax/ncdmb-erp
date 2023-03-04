@@ -38,9 +38,34 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function record(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function claims(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasOne(Record::class);
+        return $this->hasMany(Claim::class);
+    }
+
+    public function demands(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Demand::class);
+    }
+
+    public function department(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function refunds(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
+    public function organization(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'company_id');
+    }
+
+    public function level(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(GradeLevel::class, 'grade_level_id');
     }
 
     public function distributions(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -51,11 +76,6 @@ class User extends Authenticatable
     public function packages(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
         return $this->morphMany(Distribution::class, 'distributionable');
-    }
-
-    public function department()
-    {
-        return $this->record->department;
     }
 
     public function roles(): \Illuminate\Database\Eloquent\Relations\MorphToMany
@@ -106,5 +126,15 @@ class User extends Authenticatable
     public function controlledTasks(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function addRole(Role $role): \Illuminate\Database\Eloquent\Model
+    {
+        return $this->roles()->save($role);
+    }
+
+    public function raisedAdvances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TouringAdvance::class);
     }
 }

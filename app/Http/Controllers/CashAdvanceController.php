@@ -21,7 +21,7 @@ class CashAdvanceController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $cashAdvance = CashAdvance::latest()->get();
 
@@ -56,7 +56,7 @@ class CashAdvanceController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
@@ -96,7 +96,7 @@ class CashAdvanceController extends Controller
      * @param CashAdvance $cashAdvance
      * @return JsonResponse
      */
-    public function show($cashAdvance)
+    public function show($cashAdvance): JsonResponse
     {
         $cashAdvance = CashAdvance::find($cashAdvance);
 
@@ -121,7 +121,7 @@ class CashAdvanceController extends Controller
      * @param CashAdvance $cashAdvance
      * @return JsonResponse
      */
-    public function edit($cashAdvance)
+    public function edit($cashAdvance): JsonResponse
     {
         $cashAdvance = CashAdvance::find($cashAdvance);
 
@@ -147,7 +147,7 @@ class CashAdvanceController extends Controller
      * @param CashAdvance $cashAdvance
      * @return JsonResponse
      */
-    public function update(Request $request, $cashAdvance)
+    public function update(Request $request, $cashAdvance): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
@@ -191,7 +191,7 @@ class CashAdvanceController extends Controller
         ], 200);
     }
 
-    public function makeRetirement(Request $request, $cashAdvance)
+    public function makeRetirement(Request $request, $cashAdvance): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'retirements' => 'required|array',
@@ -246,7 +246,7 @@ class CashAdvanceController extends Controller
      * @param CashAdvance $cashAdvance
      * @return JsonResponse
      */
-    public function destroy($cashAdvance)
+    public function destroy($cashAdvance): JsonResponse
     {
         $cashAdvance = CashAdvance::find($cashAdvance);
 

@@ -24,6 +24,6 @@ class Expense extends Model
 
     public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Remuneration::class, 'remuneration_child_id')->where('remuneration_child_id', '>', 0);
+        return $this->belongsTo(Remuneration::class, 'remuneration_child_id');
     }
 }

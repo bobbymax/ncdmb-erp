@@ -14,8 +14,6 @@ class SubBudgetHeadResource extends JsonResource
      */
     public function toArray($request)
     {
-//        return parent::toArray($request);
-
         return [
             "id" => $this->id,
             "budget_head_id" => $this->budget_head_id,

@@ -14,9 +14,9 @@ class UserResource extends JsonResource
      */
     public function toArray($request): array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable
     {
-        //  return parent::toArray($request);
         return [
             'id' => $this->id,
+            'staff_no' => $this->staff_no,
             'firstname' => $this->firstname,
             'middlename' => $this->middlename,
             'surname' => $this->surname,
@@ -24,19 +24,20 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'avatar' => $this->avatar,
             'score' => $this->score,
-            'isAdministrator' => $this->isAdministrator,
-            'department_name' => $this->record->department->name,
-            'department_code' => $this->record->department->code,
-            'department_id' => $this->record->department->id,
-            'gradeLevel' => $this->record->level->key,
-//            'organization' => $this->record->organization,
-            'mobile' => $this->record->mobile,
-            'designation' => $this->record->designation,
-            'location' => $this->record->location,
-            'dob' => $this->record->dob,
-            'date_joined' => $this->record->date_joined,
-            'type' => $this->record->type,
-            'status' => $this->record->status,
+            'isAdministrator' => $this->isAdministrator == 1,
+            'department_name' => $this->department->name,
+            'department_code' => $this->department->code,
+            'department_id' => $this->department->id,
+            'grade_level_id' => $this->grade_level_id,
+            'gradeLevel' => $this->level->key,
+            'mobile' => $this->mobile,
+            'designation' => $this->designation,
+            'location' => $this->location,
+            'dob' => $this->dob,
+            'roles' => $this->roles,
+            'date_joined' => $this->date_joined,
+            'type' => $this->type,
+            'status' => $this->status,
         ];
     }
 }

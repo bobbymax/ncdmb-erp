@@ -26,4 +26,9 @@ class Claim extends Model
     {
         return $this->hasMany(Expenditure::class, 'claim_id');
     }
+
+    public function advance(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TouringAdvance::class);
+    }
 }

@@ -27,7 +27,7 @@ class StaffController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $users = User::latest()->get();
 
@@ -51,9 +51,85 @@ class StaffController extends Controller
      *
      * @return Response
      */
-    public function create()
+    public function create(): Response
     {
         //
+    }
+
+    public function assignRole(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'roles' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => $validator->errors(),
+                'status' => 'error',
+                'message' => 'Please fix the following error(s):'
+            ], 500);
+        }
+
+        $user = User::find($request->user_id);
+
+        if (! $user) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Wrong input entered!!'
+            ], 422);
+        }
+
+        foreach ($request->roles as $value) {
+            $role = Role::find($value['value']);
+
+            if ($role && ! in_array($role->id, $user->roles->pluck('id')->toArray())) {
+                $user->addRole($role);
+            }
+        }
+
+        return response()->json([
+            'data' => new UserResource($user),
+            'status' => 'success',
+            'message' => 'Roles have been added successfully!!'
+        ], 200);
+    }
+
+    public function passwordReset(Request $request, $user): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|max:255',
+            'shouldReset' => 'required|string|max:255|in:yes,no',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => $validator->errors(),
+                'status' => 'error',
+                'message' => 'Please fix the following error(s):'
+            ], 500);
+        }
+
+        $user = User::find($user);
+
+        if (! $user) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid token'
+            ], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return response()->json([
+            'data' => new UserResource($user),
+            'status' => 'success',
+            'message' => 'Staff Password Updated Successfully!!'
+        ], 200);
     }
 
     /**
@@ -62,7 +138,7 @@ class StaffController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'firstname' => 'required|string|max:255',
@@ -151,10 +227,10 @@ class StaffController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param User $user
+     * @param $user
      * @return JsonResponse
      */
-    public function show($user)
+    public function show($user): JsonResponse
     {
         $user = User::find($user);
 
@@ -176,10 +252,10 @@ class StaffController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param User $user
+     * @param $user
      * @return JsonResponse
      */
-    public function edit($user)
+    public function edit($user): JsonResponse
     {
         $user = User::find($user);
 
@@ -202,15 +278,20 @@ class StaffController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param User $user
+     * @param $user
      * @return JsonResponse
      */
-    public function update(Request $request, $user)
+    public function update(Request $request, $user): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'firstname' => 'required|string|max:255',
             'surname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
+            'staff_no' => 'required|string|max:255',
+            'department_id' => 'required|integer',
+            'grade_level_id' => 'required|integer',
+            'status' => 'required|string|max:255|in:in-service,retired,transfer,removed',
+            'type' => 'required|string|max:255|in:permanent,contract,secondment,appointment,contractor,support,adhoc'
         ]);
 
         if ($validator->fails()) {
@@ -235,7 +316,11 @@ class StaffController extends Controller
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
             'surname' => $request->surname,
+            'staff_no' => $request->staff_no,
             'email' => $request->email,
+            'department_id' => $request->department_id,
+            'grade_level_id' => $request->grade_level_id,
+            'status' => $request->status,
             'type' => $request->type
         ]);
 
@@ -249,10 +334,10 @@ class StaffController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param User $user
+     * @param $user
      * @return JsonResponse
      */
-    public function destroy($user)
+    public function destroy($user): JsonResponse
     {
         $user = User::find($user);
 

@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Batch extends Model
+class TouringAdvance extends Model
 {
     use HasFactory;
 
     protected $guarded = [''];
 
-    public function expenditures(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function claim(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->hasMany(Expenditure::class)->where('batch_id', '>', 0);
+        return $this->belongsTo(Claim::class, 'claim_id');
     }
 
     public function controller(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -24,10 +24,5 @@ class Batch extends Model
     public function department(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
-    }
-
-    public function demand(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(Demand::class);
     }
 }

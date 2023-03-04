@@ -36,6 +36,11 @@ class SubBudgetHead extends Model
         return $this->hasMany(Expenditure::class);
     }
 
+    public function refunds(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
     public function getBudgetYear(): int
     {
         return 2022;

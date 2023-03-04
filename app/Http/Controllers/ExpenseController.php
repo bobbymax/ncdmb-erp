@@ -51,7 +51,7 @@ class ExpenseController extends Controller
         $validator = Validator::make($request->all(), [
             'claim_id' => 'required|integer',
             'expenses' => 'required|array',
-            'status' => 'required|string|max:255|in:registered,unregistered,draft'
+            'status' => 'required|string|max:255|in:registered,unregistered'
         ]);
 
         if ($validator->fails()) {

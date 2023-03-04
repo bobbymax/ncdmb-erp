@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ClaimResource;
+use App\Http\Resources\TouringAdvanceResource;
 use App\Models\Claim;
+use App\Models\TouringAdvance;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class ClaimController extends Controller
+class TouringAdvanceController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth:api');
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -21,20 +23,20 @@ class ClaimController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $claims = auth()->user()->claims;
+        $touringAdvances = TouringAdvance::latest()->get();
 
-        if ($claims->count() < 1) {
+        if ($touringAdvances->count() < 1) {
             return response()->json([
                 'data' => [],
                 'status' => 'info',
-                'message' => 'You do not have any claims registered!'
+                'message' => 'No Data Found!!'
             ], 200);
         }
 
         return response()->json([
-            'data' => ClaimResource::collection($claims),
+            'data' => TouringAdvanceResource::collection($touringAdvances),
             'status' => 'success',
-            'message' => 'List of Claims'
+            'message' => 'List of Advances'
         ], 200);
     }
 
@@ -58,113 +60,101 @@ class ClaimController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
-            'title' => 'required|string|max:255',
-            'type' => 'required|string|in:staff-claim,touring-advance',
-            'reference_no' => 'required|string|unique:claims',
+            'controller_id' => 'required|integer',
+            'department_id' => 'required|integer',
+            'title' => 'required|string',
             'start' => 'required|date',
             'end' => 'required|date',
             'total_amount' => 'required',
-            'status' => 'required|string|in:pending,raised,registered,unregistered'
+            'reference_no' => 'required|string|max:7|unique:claims'
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'data' => $validator->errors(),
                 'status' => 'error',
-                'message' => 'Please fix the error'
+                'message' => 'Please fix errors'
             ], 500);
         }
 
         $claim = Claim::create([
-            'title' => $request->title,
-            'reference_no' => $request->reference_no,
-            'type' => $request->type,
             'user_id' => $request->user_id,
+            'reference_no' => $request->reference_no,
+            'title' => $request->title,
+            'total_amount' => $request->total_amount,
             'start' => Carbon::parse($request->start),
             'end' => Carbon::parse($request->end),
-            'total_amount' => $request->type === 'touring-advance' ? $request->total_amount : 0,
-            'status' => $request->status
+            'type' => "touring-advance",
+        ]);
+
+        if (! $claim) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Claim was not created!!!'
+            ], 500);
+        }
+
+        $touringAdvance = TouringAdvance::create([
+            'department_id' => $request->department_id,
+            'user_id' => $request->controller_id,
+            'claim_id' => $claim->id,
         ]);
 
         return response()->json([
-            'data' => new ClaimResource($claim),
+            'data' => new TouringAdvanceResource($touringAdvance),
             'status' => 'success',
-            'message' => 'Claim has been created successfully!'
+            'message' => 'Touring Advance created successfully!'
         ], 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  $claim
+     * @param  $touringAdvance
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($claim): \Illuminate\Http\JsonResponse
+    public function show($touringAdvance): \Illuminate\Http\JsonResponse
     {
-        $claim = Claim::find($claim);
+        $touringAdvance = TouringAdvance::find($touringAdvance);
 
-        if (! $claim) {
+        if (! $touringAdvance) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
-                'message' => 'Invalid token entered'
+                'message' => 'Invalid ID entry'
             ], 422);
         }
 
         return response()->json([
-            'data' => new ClaimResource($claim),
+            'data' => $touringAdvance,
             'status' => 'success',
-            'message' => 'Claim details'
-        ], 200);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  $claim
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function fetchClaim($claim): \Illuminate\Http\JsonResponse
-    {
-        $claim = Claim::where('reference_no', $claim)->first();
-
-        if (! $claim) {
-            return response()->json([
-                'data' => null,
-                'status' => 'error',
-                'message' => 'Invalid token entered'
-            ], 422);
-        }
-
-        return response()->json([
-            'data' => new ClaimResource($claim),
-            'status' => 'success',
-            'message' => 'Claim details'
+            'message' => 'Touring Advance Details!'
         ], 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  $claim
+     * @param  $touringAdvance
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($claim): \Illuminate\Http\JsonResponse
+    public function edit($touringAdvance): \Illuminate\Http\JsonResponse
     {
-        $claim = Claim::find($claim);
+        $touringAdvance = TouringAdvance::find($touringAdvance);
 
-        if (! $claim) {
+        if (! $touringAdvance) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
-                'message' => 'Invalid token entered'
+                'message' => 'Invalid ID entry'
             ], 422);
         }
 
         return response()->json([
-            'data' => new ClaimResource($claim),
+            'data' => $touringAdvance,
             'status' => 'success',
-            'message' => 'Claim details'
+            'message' => 'Touring Advance Details!'
         ], 200);
     }
 
@@ -172,13 +162,15 @@ class ClaimController extends Controller
      * Update the specified resource in storage.
      *
      * @param  Request  $request
-     * @param  $claim
+     * @param  $touringAdvance
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $claim): \Illuminate\Http\JsonResponse
+    public function update(Request $request, $touringAdvance): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
+            'user_id' => 'required|integer',
+            'department_id' => 'required|integer',
+            'title' => 'required|string',
             'start' => 'required|date',
             'end' => 'required|date',
             'total_amount' => 'required',
@@ -188,60 +180,74 @@ class ClaimController extends Controller
             return response()->json([
                 'data' => $validator->errors(),
                 'status' => 'error',
-                'message' => 'Please fix the error'
+                'message' => 'Please fix errors'
             ], 500);
         }
 
-        $claim = Claim::find($claim);
+        $touringAdvance = TouringAdvance::find($touringAdvance);
+
+        if (! $touringAdvance || $touringAdvance->status === "raised") {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid ID entry'
+            ], 422);
+        }
+
+        $claim = Claim::find($touringAdvance->claim_id);
 
         if (! $claim) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
-                'message' => 'Invalid token entered'
+                'message' => 'Invalid ID entry'
             ], 422);
         }
 
         $claim->update([
+            'user_id' => $request->user_id,
             'title' => $request->title,
+            'total_amount' => $request->total_amount,
             'start' => Carbon::parse($request->start),
             'end' => Carbon::parse($request->end),
-            'total_amount' => $request->total_amount ?? 0,
-            'status' => $request->status ?? 'pending'
+        ]);
+
+        $touringAdvance->update([
+            'department_id' => $request->department_id,
         ]);
 
         return response()->json([
-            'data' => new ClaimResource($claim),
+            'data' => new TouringAdvanceResource($touringAdvance),
             'status' => 'success',
-            'message' => 'Claim has been updated successfully!'
+            'message' => 'Touring Advance updated successfully!'
         ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  $claim
+     * @param  $touringAdvance
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($claim): \Illuminate\Http\JsonResponse
+    public function destroy($touringAdvance): \Illuminate\Http\JsonResponse
     {
-        $claim = Claim::find($claim);
+        $touringAdvance = TouringAdvance::find($touringAdvance);
 
-        if (! $claim) {
+        if (! $touringAdvance || $touringAdvance->status === "raised") {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
-                'message' => 'Invalid token entered'
+                'message' => 'Invalid ID entry'
             ], 422);
         }
 
-        $old = $claim;
-        $claim->delete();
+        $old = $touringAdvance;
+        $touringAdvance->delete();
 
         return response()->json([
             'data' => $old,
             'status' => 'success',
-            'message' => 'Claim details deleted successfully'
+            'message' => 'Touring Advance has been deleted successfully!!'
         ], 200);
     }
 }
