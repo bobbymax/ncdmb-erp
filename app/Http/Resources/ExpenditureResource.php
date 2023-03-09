@@ -35,12 +35,13 @@ class ExpenditureResource extends JsonResource
             'payment_type' => $this->payment_type,
             'status' => $this->status,
             'approval_status' => $this->approval_status,
+            'paid' => $this->refunds->count() > 0 ? $this->refunds->sum('amount') : 0,
             'stage' => $this->stage,
             'remark' => $this->remark,
             'closed' => $this->closed,
             'refunds' => $this->refunds && $this->refunds->sum('amount') == $this->amount,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at->format('d F, Y'),
+            'updated_at' => $this->updated_at->format('d F, Y'),
             'fund' => new SubBudgetHeadResource($this->subBudgetHead)
         ];
     }

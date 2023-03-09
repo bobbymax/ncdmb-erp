@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ExpenditureResource;
 use App\Http\Resources\SubBudgetHeadResource;
 use App\Models\SubBudgetHead;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class SubBudgetHeadController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $subBudgetHeads = SubBudgetHead::latest()->get();
 
@@ -55,7 +56,7 @@ class SubBudgetHeadController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'budget_head_id' => 'required|integer',
@@ -94,10 +95,10 @@ class SubBudgetHeadController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\SubBudgetHead  $subBudgetHead
+     * @param  $subBudgetHead
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($subBudgetHead)
+    public function show($subBudgetHead): \Illuminate\Http\JsonResponse
     {
         $subBudgetHead = SubBudgetHead::find($subBudgetHead);
 
@@ -116,13 +117,32 @@ class SubBudgetHeadController extends Controller
         ], 200);
     }
 
+    public function fetExpenditures($subBudgetHead): \Illuminate\Http\JsonResponse
+    {
+        $subBudgetHead = SubBudgetHead::find($subBudgetHead);
+
+        if (! $subBudgetHead) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid ID entered'
+            ], 422);
+        }
+
+        return response()->json([
+            'data' => ExpenditureResource::collection($subBudgetHead->expenditures),
+            'status' => 'success',
+            'message' => 'Expenditures List'
+        ], 200);
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\SubBudgetHead  $subBudgetHead
+     * @param  $subBudgetHead
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($subBudgetHead)
+    public function edit($subBudgetHead): \Illuminate\Http\JsonResponse
     {
         $subBudgetHead = SubBudgetHead::find($subBudgetHead);
 
@@ -144,11 +164,11 @@ class SubBudgetHeadController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\SubBudgetHead  $subBudgetHead
+     * @param  Request  $request
+     * @param  $subBudgetHead
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $subBudgetHead)
+    public function update(Request $request, $subBudgetHead): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'budget_head_id' => 'required|integer',
@@ -197,10 +217,10 @@ class SubBudgetHeadController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\SubBudgetHead  $subBudgetHead
+     * @param  $subBudgetHead
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($subBudgetHead)
+    public function destroy($subBudgetHead): \Illuminate\Http\JsonResponse
     {
         $subBudgetHead = SubBudgetHead::find($subBudgetHead);
 

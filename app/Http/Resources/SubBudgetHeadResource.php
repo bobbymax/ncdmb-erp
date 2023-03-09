@@ -27,6 +27,7 @@ class SubBudgetHeadResource extends JsonResource
             "type" => $this->type,
             "status" => $this->status,
             "logistics" => $this->logistics,
+            "fund" => $this->fund !== null,
             "approved_amount" => $this->fund !== null ? $this->fund->approved_amount : 0,
             "booked_expenditure" => $this->fund !== null ? $this->fund->booked_expenditure : 0,
             "actual_expenditure" => $this->fund !== null ? $this->fund->actual_expenditure : 0,

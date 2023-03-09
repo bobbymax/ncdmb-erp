@@ -187,7 +187,6 @@ class RefundController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
-            'sub_budget_head_id' => 'required|integer',
             'status' => 'required|string|max:255|in:approved,denied',
         ]);
 
@@ -236,7 +235,7 @@ class RefundController extends Controller
             $credit->actual_balance += $refund->amount;
             $credit->save();
 
-            if ($refund->expenditure->amount == $refund->expenditure->refunds->sum('amount')) {
+            if ($refund->expenditure->amount == $refund->expenditure->refunds->where('status', 'approved')->sum('amount')) {
                 $refund->expenditure->update([
                     'status' => 'refunded'
                 ]);
@@ -253,7 +252,8 @@ class RefundController extends Controller
                 'type' => $refund->expenditure->type,
                 'payment_type' => $refund->expenditure->payment_type,
                 'status' => 'paid',
-                'approval_status' => 'accounts',
+                'stage' => 'accounts',
+                'approval_status' => 'posted',
                 'level' => 4,
                 'closed' => true
             ]);

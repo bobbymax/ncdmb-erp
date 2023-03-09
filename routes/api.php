@@ -75,4 +75,5 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::patch('clear/expenditures/{expenditure}', 'ExpenditureController@clearPayment');
     Route::patch('response/demands/{demand}', 'DemandController@reversalResponse');
     Route::patch('fulfill/refunds/{refund}', 'RefundController@fulfillRefundRequest');
+    Route::get('fetch/expenditures/{subBudgetHead}', 'SubBudgetHeadController@fetExpenditures');
 });
