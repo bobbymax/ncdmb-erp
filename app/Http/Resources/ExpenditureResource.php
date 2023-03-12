@@ -27,6 +27,7 @@ class ExpenditureResource extends JsonResource
             'claim_id' => $this->claim_id,
             'staffId' => $this->claim_id > 0 ? $this->claim->staff->staff_no : "",
             'batch_id' => $this->batch_id,
+            'batch_no' => $this->batch_id > 0 ? $this->batch->code : "",
             'amount' => $this->amount,
             'approved_amount' => $this->approved_amount,
             'description' => $this->description,

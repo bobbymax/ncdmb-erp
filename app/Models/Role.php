@@ -25,4 +25,9 @@ class Role extends Model
     {
         return $this->morphedByMany(Module::class, 'roleable');
     }
+
+    public function stages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Stage::class);
+    }
 }

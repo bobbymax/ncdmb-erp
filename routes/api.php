@@ -64,6 +64,8 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::apiResource('claims', 'ClaimController');
     Route::apiResource('touringAdvances', 'TouringAdvanceController');
     Route::apiResource('expenses', 'ExpenseController');
+    Route::apiResource('processes', 'ProcessController');
+    Route::apiResource('stages', 'StageController');
 
     // Custom Routes
     Route::post('verify/{training}', 'CustomRouteController@verifyTraining');
