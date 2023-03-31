@@ -20,4 +20,10 @@ class Process extends Model
     {
         return $this->hasManyThrough(Role::class, Stage::class);
     }
+
+    public function nextStage(Stage $stage)
+    {
+        $order = $stage->order + 1;
+        return $this->stages->where('order', $order)->first() ?? null;
+    }
 }

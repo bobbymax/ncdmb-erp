@@ -23,8 +23,10 @@ class ModuleResource extends JsonResource
             "icon" => $this->icon,
             "url" => $this->url,
             "parentId" => $this->parentId,
+            "parent" => $this->parentId > 0 ? $this->parent->label : "none",
             "type" => $this->type,
             "children" => $this->children,
+            "roles" => $this->roles->pluck('label')->toArray(),
             "created_at" => $this->created_at,
             "updated_at" => $this->updated_at
         ];

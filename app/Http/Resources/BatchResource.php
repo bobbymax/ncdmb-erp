@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\SubBudgetHead;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BatchResource extends JsonResource
@@ -17,8 +16,6 @@ class BatchResource extends JsonResource
     {
 //        return parent::toArray($request);
 
-        $sub = SubBudgetHead::where('code', $this->sub_budget_head_code)->first();
-
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -29,7 +26,7 @@ class BatchResource extends JsonResource
             'directorate' => $this->department->directorate(),
             'code' => $this->code,
             'sub_budget_head_code' => $this->sub_budget_head_code,
-            'sub_budget_head_name' => $sub->name ?? "",
+            'sub_budget_head_name' => $this->subBudgetHead()->name ?? "",
             'amount' => $this->amount,
             'approved_amount' => $this->approved_amount,
             'no_of_payments' => $this->no_of_payments,
@@ -38,6 +35,7 @@ class BatchResource extends JsonResource
             'stage' => $this->stage,
             'status' => $this->status,
             'closed' => $this->closed,
+            'track' => $this->track,
             'created_at' => $this->created_at->format('d F, Y'),
             'updated_at' => $this->updated_at->format('d F, Y')
         ];

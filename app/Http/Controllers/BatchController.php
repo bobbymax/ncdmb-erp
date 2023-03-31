@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\BatchResource;
 use App\Models\Batch;
+use App\Models\Entry;
 use App\Models\Expenditure;
+use App\Models\Track;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -102,15 +104,6 @@ class BatchController extends Controller
                     }
                 }
             }
-
-//            $stages = ["budget-office", "treasury", "audit"];
-//
-//            foreach($stages as $stage) {
-//                $track = Tracking::create([
-//                    'batch_id' => $batch->id,
-//                    'stage' => $stage,
-//                ]);
-//            }
         }
 
         return response()->json([
@@ -168,6 +161,75 @@ class BatchController extends Controller
             'status' => 'success',
             'message' => 'Batch details'
         ], 200);
+    }
+
+    /**
+     * @param Request $request
+     * @param $batch
+     * @return JsonResponse
+     */
+    public function startProcess(Request $request, $batch): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'department_id' => 'required|integer',
+            'stage_id' => 'required|integer',
+            'user_id' => 'required|integer',
+            'code' => 'required|string|unique:tracks',
+            'type' => 'required|string|max:255|in:inflow,outflow',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => $validator->errors(),
+                'status' => 'error',
+                'message' => 'Please fix the following errors!'
+            ], 500);
+        }
+
+        $batch = Batch::find($batch);
+
+        if (! $batch) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Batch with this code was not found!!!'
+            ], 422);
+        }
+
+        if ($batch->track != null) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'This process has already been initiated'
+            ], 422);
+        }
+
+        $track = new Track;
+        $track->department_id = $request->department_id;
+        $track->stage_id = $request->stage_id;
+        $track->code = $request->code;
+
+        if (!$batch->track()->save($track)) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Something went terribly wrong!!'
+            ], 500);
+        }
+
+        $entry = new Entry;
+        $entry->department_id = $track->department_id;
+        $entry->user_id = $request->user_id;
+        $entry->stage_id = $track->stage_id;
+        $entry->type = $request->type;
+        $entry->isActive = true;
+        $track->entries()->save($entry);
+
+        return response()->json([
+            'data' => new BatchResource($batch),
+            'status' => 'success',
+            'message' => 'Payment Process for this batch has been initiated'
+        ], 201);
     }
 
     /**

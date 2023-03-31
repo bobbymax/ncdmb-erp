@@ -13,9 +13,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('expenditures', function (Blueprint $table) {
-            $table->dropColumn('cash_advance_id');
-            $table->bigInteger('claim_id')->default(0)->after('beneficiary');
+        Schema::table('tracks', function (Blueprint $table) {
+            $table->enum('state', ['inflow', 'outflow'])->default('inflow')->after('trackable_type');
         });
     }
 
@@ -26,9 +25,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('expenditures', function (Blueprint $table) {
-            $table->dropColumn('claim_id');
-            $table->bigInteger('cash_advance_id')->default(0)->after('beneficiary');
+        Schema::table('tracks', function (Blueprint $table) {
+            $table->dropColumn('state');
         });
     }
 };

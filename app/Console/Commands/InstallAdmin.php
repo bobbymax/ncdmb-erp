@@ -31,9 +31,9 @@ class InstallAdmin extends Command
     /**
      * Execute the console command.
      *
-     * @return int
+     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $this->info("Creating Admin Department");
         $department = $this->addDepartment();
@@ -57,24 +57,23 @@ class InstallAdmin extends Command
         }
 
         $this->info("Creating Admin User");
-        $user = $this->addAdminRecord();
 
-        if (! $user) {
-            $this->error('Something went wrong!!');
-        }
-
-        Record::create([
-            'user_id' => $user->id,
-            'designation' => 'Technical Administrator',
+        User::create([
             'department_id' => $department->id,
-            'staffId' => 'ADMIN01',
-            'gradeLevel' => $level->id,
-            'mobile' => '09093479079',
+            'grade_level_id' => $level->id,
+            'firstname' => 'Admin',
+            'surname' => 'Staff',
+            'staff_no' => 'ADMIN01',
+            'email' => 'admin@admin.com',
+            'password' => Hash::make('password'),
+            'mobile' => '2349093479079',
+            'designation' => 'Super Administrator',
             'location' => 'Abuja FCT',
             'dob' => Carbon::parse(Carbon::now()),
             'date_joined' => Carbon::parse(Carbon::now()),
             'type' => 'permanent',
-            'status' => 'in-service'
+            'status' => 'in-service',
+            'isAdministrator' => true
         ]);
 
         $this->info("Admin User Created Successfully");
@@ -106,18 +105,6 @@ class InstallAdmin extends Command
             'type' => 'roles',
             'no_expiration' => true,
             'isSuper' => true,
-        ]);
-    }
-
-    protected function addAdminRecord()
-    {
-        return User::create([
-            'firstname' => 'Super',
-            'middlename' => 'Technical',
-            'surname' => 'Administrator',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('password'),
-            'isAdministrator' => true
         ]);
     }
 
@@ -153,17 +140,12 @@ class InstallAdmin extends Command
             [
                 'name' => 'Modules',
                 'label' => 'modules',
-                'code' => 'MODD',
+                'code' => 'MOD',
                 'icon' => 'layers',
                 'url' => '/admin/modules',
                 'parentId' => 1,
                 'type' => 'module'
             ],
         ];
-    }
-
-    protected function addOrganization()
-    {
-
     }
 }

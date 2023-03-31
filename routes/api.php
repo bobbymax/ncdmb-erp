@@ -41,6 +41,8 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::apiResource('settlements', 'SettlementController');
     Route::apiResource('demands', 'DemandController');
     Route::apiResource('refunds', 'RefundController');
+    Route::apiResource('tracks', 'TrackController');
+    Route::apiResource('entries', 'EntryController');
 
     Route::apiResource('brands', 'BrandController');
     Route::apiResource('classifications', 'ClassificationController');
@@ -68,6 +70,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::apiResource('stages', 'StageController');
 
     // Custom Routes
+    Route::post('imports', 'ImportController@importDependencies');
     Route::post('verify/{training}', 'CustomRouteController@verifyTraining');
     Route::get('fetch/claims/{claim}', 'ClaimController@fetchClaim');
     Route::get('collect/batches/{batch}', 'BatchController@collectBatch');
@@ -78,4 +81,6 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::patch('response/demands/{demand}', 'DemandController@reversalResponse');
     Route::patch('fulfill/refunds/{refund}', 'RefundController@fulfillRefundRequest');
     Route::get('fetch/expenditures/{subBudgetHead}', 'SubBudgetHeadController@fetExpenditures');
+    Route::patch('process/batches/{batch}', 'BatchController@startProcess');
+    Route::get('harvest/processes/{process}', 'ProcessController@fetchByType');
 });

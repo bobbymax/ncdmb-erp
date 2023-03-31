@@ -45,4 +45,9 @@ class Expenditure extends Model
     {
         return $this->subBudgetHead->fund;
     }
+
+    public function tracks(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Track::class, 'trackable');
+    }
 }

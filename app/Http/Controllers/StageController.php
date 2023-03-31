@@ -17,11 +17,25 @@ class StageController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
-        //
+        $stages = Stage::latest()->get();
+
+        if ($stages->count() < 1) {
+            return response()->json([
+                'data' => [],
+                'status' => 'info',
+                'message' => 'No Data Found!!'
+            ], 200);
+        }
+
+        return response()->json([
+            'data' => StageResource::collection($stages),
+            'status' => 'success',
+            'message' => 'List of Stages'
+        ], 200);
     }
 
     /**

@@ -18,7 +18,7 @@ class SettingController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $settings = Setting::latest()->get();
 
@@ -50,10 +50,10 @@ class SettingController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'display_name' => 'required|string|max:255',
@@ -89,10 +89,10 @@ class SettingController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Setting  $setting
+     * @param  $setting
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($setting)
+    public function show($setting): \Illuminate\Http\JsonResponse
     {
         $setting = Setting::find($setting);
 
@@ -114,10 +114,10 @@ class SettingController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Setting  $setting
+     * @param  $setting
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($setting)
+    public function edit($setting): \Illuminate\Http\JsonResponse
     {
         $setting = Setting::find($setting);
 
@@ -139,11 +139,11 @@ class SettingController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Setting  $setting
+     * @param  Request  $request
+     * @param  $setting
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $setting)
+    public function update(Request $request, $setting): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'display_name' => 'required|string|max:255',
@@ -190,10 +190,10 @@ class SettingController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Setting  $setting
+     * @param  $setting
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($setting)
+    public function destroy($setting): \Illuminate\Http\JsonResponse
     {
         $setting = Setting::find($setting);
 

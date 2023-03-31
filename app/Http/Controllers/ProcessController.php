@@ -30,7 +30,7 @@ class ProcessController extends Controller
                 'data' => [],
                 'status' => 'info',
                 'message' => 'No data found!'
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -90,8 +90,11 @@ class ProcessController extends Controller
             Stage::create([
                 'process_id' => $process->id,
                 'role_id' => $stage['role_id'],
+                'office' => $stage['office'],
+                'label' => Str::slug($stage['office']),
                 'canEdit' => $stage['canEdit'],
                 'canQuery' => $stage['canQuery'],
+                'accounts' => $stage['accounts'],
                 'action' => $stage['action'],
                 'order' => $stage['order']
             ]);
@@ -102,6 +105,24 @@ class ProcessController extends Controller
             'status' => "success",
             'message' => 'Process has been created successfully!!'
         ], 201);
+    }
+
+    public function fetchByType($process): \Illuminate\Http\JsonResponse
+    {
+        $process = Process::where('type', $process)->first();
+
+        if (! $process) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Invalid ID entered'
+            ], 422);
+        }
+        return response()->json([
+            'data' => new ProcessResource($process),
+            'status' => 'success',
+            'message' => 'Process details'
+        ], 200);
     }
 
     /**

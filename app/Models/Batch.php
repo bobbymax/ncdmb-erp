@@ -30,4 +30,14 @@ class Batch extends Model
     {
         return $this->hasOne(Demand::class);
     }
+
+    public function track(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    {
+        return $this->morphOne(Track::class, 'trackable');
+    }
+
+    public function subBudgetHead()
+    {
+        return SubBudgetHead::where('code', $this->sub_budget_head_code)->first();
+    }
 }

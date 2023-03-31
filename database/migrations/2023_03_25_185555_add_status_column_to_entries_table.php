@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('expenditures', function (Blueprint $table) {
-            $table->integer('level')->default(0)->after('stage');
+        Schema::table('entries', function (Blueprint $table) {
+            $table->enum('status', ['pending', 'sent', 'received'])->default('pending')->after('type');
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('expenditures', function (Blueprint $table) {
-            $table->dropColumn('level');
+        Schema::table('entries', function (Blueprint $table) {
+            $table->dropColumn('status');
         });
     }
 };

@@ -18,8 +18,12 @@ class StageResource extends JsonResource
             'id' => $this->id,
             'process_id' => $this->process_id,
             'role_id' => $this->role_id,
+            'role_name' => $this->role->name,
+            'office' => $this->office,
+            'label' => $this->label,
             'canEdit' => $this->canEdit == 1,
             'canQuery' => $this->canQuery == 1,
+            'accounts' => $this->accounts == 1,
             'action' => $this->action,
             'order' => $this->order
         ];
