@@ -22,7 +22,7 @@ class ExpenditureController extends Controller
      */
     public function index(): JsonResponse
     {
-        $expenditures = Expenditure::with(['subBudgetHead'])->latest()->get();
+        $expenditures = Expenditure::latest()->get();
 
         if ($expenditures->count() < 1) {
             return response()->json([

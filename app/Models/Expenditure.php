@@ -11,6 +11,8 @@ class Expenditure extends Model
 
     protected $guarded = [''];
 
+    protected $with = ['controller', 'department', 'subBudgetHead'];
+
     public function controller(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

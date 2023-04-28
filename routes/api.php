@@ -83,4 +83,5 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::get('fetch/expenditures/{subBudgetHead}', 'SubBudgetHeadController@fetExpenditures');
     Route::patch('process/batches/{batch}', 'BatchController@startProcess');
     Route::get('harvest/processes/{process}', 'ProcessController@fetchByType');
+    Route::post('configure', 'SettingController@configuration');
 });

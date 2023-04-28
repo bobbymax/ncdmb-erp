@@ -34,7 +34,7 @@ class UserResource extends JsonResource
             'designation' => $this->designation,
             'location' => $this->location,
             'dob' => $this->dob,
-            'roles' => $this->roles,
+            'roles' => $this->roles->pluck('label')->toArray(),
             'date_joined' => $this->date_joined,
             'type' => $this->type,
             'status' => $this->status,

@@ -82,8 +82,39 @@ class SettingController extends Controller
         return response()->json([
             'data' => $setting,
             'status' => 'success',
-            'message' => 'WorkFlow Created Successfully!'
+            'message' => 'Setting value created successfully!'
         ], 201);
+    }
+
+    public function configuration(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'state' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => $validator->errors(),
+                'status' => 'error',
+                'message' => 'Please fix the following error(s):'
+            ], 500);
+        }
+
+        $settings = Setting::latest()->get();
+
+
+        foreach ($settings as $key => $setting) {
+            if (isset($request->state[$setting->key])) {
+                $setting->value = $request->state[$setting->key];
+                $setting->save();
+            }
+        }
+
+        return response()->json([
+            'data' => $settings,
+            'status' => 'success',
+            'message' => 'Settings value updated successfully!'
+        ], 200);
     }
 
     /**

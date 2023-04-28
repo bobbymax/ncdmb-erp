@@ -23,7 +23,7 @@ class ModuleController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $modules = Module::with('roles')->latest()->get();
+        $modules = Module::latest()->get();
 
         if ($modules->count() < 1) {
             return response()->json([
@@ -113,10 +113,10 @@ class ModuleController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Module  $module
+     * @param  $module
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($module)
+    public function show($module): \Illuminate\Http\JsonResponse
     {
         $module = Module::find($module);
 
@@ -138,10 +138,10 @@ class ModuleController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Module  $module
+     * @param  $module
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($module)
+    public function edit($module): \Illuminate\Http\JsonResponse
     {
         $module = Module::find($module);
 
@@ -163,11 +163,11 @@ class ModuleController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Module  $module
+     * @param  Request  $request
+     * @param  $module
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $module)
+    public function update(Request $request, $module): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -205,6 +205,14 @@ class ModuleController extends Controller
             'type' => $request->type,
             'url' => $request->url
         ]);
+
+        foreach ($request->roles as $val) {
+            $role = Role::find($val);
+
+            if ($role) {
+                $module->roles()->save($role);
+            }
+        }
 
         return response()->json([
             'data' => new ModuleResource($module),

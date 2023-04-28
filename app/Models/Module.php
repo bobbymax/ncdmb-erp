@@ -11,6 +11,8 @@ class Module extends Model
 
     protected $guarded = [''];
 
+    protected $with = ['roles'];
+
     public function roles(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {
         return $this->morphToMany(Role::class, 'roleable');
@@ -24,5 +26,10 @@ class Module extends Model
     public function children(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Module::class, 'parentId');
+    }
+
+    public function addRole(Role $role): Model
+    {
+        return $this->roles()->save($role);
     }
 }

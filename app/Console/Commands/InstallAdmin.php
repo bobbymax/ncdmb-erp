@@ -58,7 +58,7 @@ class InstallAdmin extends Command
 
         $this->info("Creating Admin User");
 
-        User::create([
+        $user = User::create([
             'department_id' => $department->id,
             'grade_level_id' => $level->id,
             'firstname' => 'Admin',
@@ -77,10 +77,13 @@ class InstallAdmin extends Command
         ]);
 
         $this->info("Admin User Created Successfully");
+        $this->info("Adding User to Admin Role");
+        $user->roles()->save($role);
         $this->info("Creating Modules");
-        $this->addModules();
+        $modules = $this->addModules();
         $this->info("Modules Created Successfully");
-
+        $this->info("Adding Modules to roles");
+        $this->addModuleToRole($modules, $role);
         $this->info("Admin record has been created successfully!!!");
     }
 
@@ -94,6 +97,15 @@ class InstallAdmin extends Command
             'type' => 'directorate',
             'isActive' => true
         ]);
+    }
+
+    protected function addModuleToRole($mods, $role): bool
+    {
+        foreach($mods as $mod) {
+            $mod->roles()->save($role);
+        }
+
+        return true;
     }
 
     protected function addRole()
@@ -116,13 +128,14 @@ class InstallAdmin extends Command
         ]);
     }
 
-    protected function addModules(): bool
+    protected function addModules(): array
     {
+        $modules = [];
         foreach ($this->getAdminModules() as $module) {
-            Module::create($module);
+            $modules[] = Module::create($module);
         }
 
-        return true;
+        return $modules;
     }
 
     protected function getAdminModules(): array
@@ -143,6 +156,24 @@ class InstallAdmin extends Command
                 'code' => 'MOD',
                 'icon' => 'layers',
                 'url' => '/admin/modules',
+                'parentId' => 1,
+                'type' => 'module'
+            ],
+            [
+                'name' => 'Import',
+                'label' => 'import',
+                'code' => 'ITP',
+                'icon' => 'upload',
+                'url' => '/admin/import',
+                'parentId' => 1,
+                'type' => 'module'
+            ],
+            [
+                'name' => 'Exports',
+                'label' => 'exports',
+                'code' => 'EXP',
+                'icon' => 'exit_to_app',
+                'url' => '/admin/exports',
                 'parentId' => 1,
                 'type' => 'module'
             ],

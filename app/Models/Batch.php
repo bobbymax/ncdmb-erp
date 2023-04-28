@@ -11,6 +11,8 @@ class Batch extends Model
 
     protected $guarded = [''];
 
+    protected $with = ['expenditures', 'department'];
+
     public function expenditures(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Expenditure::class)->where('batch_id', '>', 0);

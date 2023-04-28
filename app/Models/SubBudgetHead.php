@@ -11,6 +11,8 @@ class SubBudgetHead extends Model
 
     protected $guarded = [''];
 
+    protected $with = ['budgetHead:id,budgetId,name', 'fund', 'department:id,name,code'];
+
     public function department(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');

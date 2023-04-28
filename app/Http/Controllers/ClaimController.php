@@ -21,7 +21,7 @@ class ClaimController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $claims = auth()->user()->claims;
+        $claims = Claim::with('expenses')->latest()->get();
 
         if ($claims->count() < 1) {
             return response()->json([

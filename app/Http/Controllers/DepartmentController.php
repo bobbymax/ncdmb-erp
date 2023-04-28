@@ -19,7 +19,7 @@ class DepartmentController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $departments = Department::latest()->get();
 
@@ -51,10 +51,10 @@ class DepartmentController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -91,10 +91,10 @@ class DepartmentController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Department  $department
+     * @param  $department
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($department)
+    public function show($department): \Illuminate\Http\JsonResponse
     {
         $department = Department::find($department);
 
@@ -116,10 +116,10 @@ class DepartmentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Department  $department
+     * @param  $department
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($department)
+    public function edit($department): \Illuminate\Http\JsonResponse
     {
         $department = Department::find($department);
 
@@ -141,11 +141,11 @@ class DepartmentController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Department  $department
+     * @param  Request  $request
+     * @param  $department
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $department)
+    public function update(Request $request, $department): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -191,10 +191,10 @@ class DepartmentController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Department  $department
+     * @param  $department
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($department)
+    public function destroy($department): \Illuminate\Http\JsonResponse
     {
         $department = Department::find($department);
 

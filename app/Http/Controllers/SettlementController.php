@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SettlementResource;
+use App\Models\GradeLevel;
 use App\Models\Settlement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class SettlementController extends Controller
 {
+
+    public $settlements;
+
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -56,7 +60,7 @@ class SettlementController extends Controller
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'grade_level_id' => 'required|integer',
+            'grades' => 'required|array',
             'remuneration_id' => 'required|integer',
             'amount' => 'required',
         ]);
@@ -69,16 +73,24 @@ class SettlementController extends Controller
             ], 500);
         }
 
-        $settlement = Settlement::create([
-            'remuneration_id' => $request->remuneration_id,
-            'grade_level_id' => $request->grade_level_id,
-            'amount' => $request->amount
-        ]);
+        foreach ($request->grades as $value) {
+            $grade = GradeLevel::find($value['value']);
+
+            if ($grade) {
+                $settlement = Settlement::create([
+                    'remuneration_id' => $request->remuneration_id,
+                    'grade_level_id' => $grade->id,
+                    'amount' => $request->amount
+                ]);
+
+                $this->settlements[] = $settlement;
+            }
+        }
 
         return response()->json([
-            'data' => new SettlementResource($settlement),
+            'data' => SettlementResource::collection($this->settlements),
             'status' => 'success',
-            'message' => 'Settlement created successfully!'
+            'message' => 'Settlements created successfully!'
         ], 201);
     }
 

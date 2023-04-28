@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
@@ -13,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         //
     }
@@ -23,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         if (Schema::hasTable('settings')) {
             config(['site' => Setting::all(['key', 'value'])->keyBy('key')->transform(function ($setting) {
@@ -31,5 +32,7 @@ class AppServiceProvider extends ServiceProvider
                 })->toArray()
             ]);
         }
+
+//        Model::preventLazyLoading(! $this->app->isProduction());
     }
 }

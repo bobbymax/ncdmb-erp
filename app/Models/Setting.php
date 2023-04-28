@@ -10,4 +10,9 @@ class Setting extends Model
     use HasFactory;
 
     protected $guarded = [''];
+
+    public function roles(): \Illuminate\Database\Eloquent\Relations\MorphToMany
+    {
+        return $this->morphToMany(Role::class, 'roleable');
+    }
 }

@@ -46,14 +46,16 @@ class ImportController extends Controller
         }
 
 
-        $this->result = match ($request->data) {
+        $this->result = match ($request->type) {
             'modules' => $this->loadModules($request->data),
-            'levels' => $this->loadGradeLevels($request->data),
+            'grade-levels' => $this->loadGradeLevels($request->data),
             'staff' => $this->loadStaff($request->data),
             'departments' => $this->loadDepartments($request->data),
             'budget-heads' => $this->loadBudgetHeads($request->data),
             'sub-budget-heads' => $this->loadSubBudgetHeads($request->data),
+            'funds' => $this->loadFunds($request->data),
             'roles' => $this->loadRoles($request->data),
+            'claims' => $this->loadClaims($request->data),
             default => []
         };
 
@@ -101,47 +103,51 @@ class ImportController extends Controller
             $department = Department::where('code', $value['DEPARTMENT'])->first();
             $subBudgetHead = SubBudgetHead::where('code', $value['CODE'])->first();
 
-            if ($budgetHead && $department) {
+            if ($budgetHead && $department && ! $subBudgetHead) {
 
-                $year = config('site.budget_year') ?? config('budget.budget_year');
-                $currentYear = isset($value['YEAR']) ? $value['YEAR'] : $year;
+                $type = match(substr($value['CODE'], 0)) {
+                    'R' => 'recurrent',
+                    'P' => 'personnel',
+                    default => 'capital'
+                };
 
-                if (! $subBudgetHead) {
-
-                    $type = match(substr($value['CODE'], 0)) {
-                        'R' => 'recurrent',
-                        'P' => 'personnel',
-                        default => 'capital'
-                    };
-
-                    $subBudgetHead = SubBudgetHead::create([
-                        'budget_head_id' => $budgetHead->id,
-                        'department_id' => $department->id,
-                        'code' => $value['CODE'],
-                        'name' => $value['NAME'],
-                        'label' => Str::slug($value['NAME']),
-                        'type' => $type,
-                        'active' => true
-                    ]);
-                }
-
-                $fund = $subBudgetHead->fund;
-
-                if (! $fund) {
-                    Fund::create([
-                        'sub_budget_head_id' => $subBudgetHead->id,
-                        'approved_amount' => $value['AMOUNT'],
-                        'booked_balance' => $value['AMOUNT'],
-                        'actual_balance' => $value['AMOUNT'],
-                        'year' => $currentYear
-                    ]);
-                }
+                $subBudgetHead = SubBudgetHead::create([
+                    'budget_head_id' => $budgetHead->id,
+                    'department_id' => $department->id,
+                    'code' => $value['CODE'],
+                    'name' => $value['NAME'],
+                    'label' => Str::slug($value['NAME']) . "-" . time() . uniqid(),
+                    'type' => $type,
+                ]);
             }
 
             $this->bulk[] = $subBudgetHead;
         }
 
         return SubBudgetHeadResource::collection($this->bulk);
+    }
+
+    protected function loadFunds(array $data): array
+    {
+        foreach ($data as $value) {
+            $subBudgetHead = SubBudgetHead::where('code', $value['CODE'])->first();
+
+            if ($subBudgetHead) {
+                $fund = Fund::create([
+                    'sub_budget_head_id' => $subBudgetHead->id,
+                    'approved_amount' => $value['APPROVED'],
+                    'booked_expenditure' => $value['COMMITMENT'],
+                    'actual_expenditure' => $value['ACTUAL'],
+                    'booked_balance' => $value['CBAL'],
+                    'actual_balance' => $value['ABAL'],
+                    'year' => $value['YEAR']
+                ]);
+
+                $this->bulk[] = $fund;
+            }
+        }
+
+        return $this->bulk;
     }
 
     protected function loadModules(array $data): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
@@ -159,7 +165,8 @@ class ImportController extends Controller
                 $module = Module::create([
                     'name' => $value['NAME'],
                     'label' => $label,
-                    'path' => $value['PATH'],
+                    'code' => $value['CODE'],
+                    'url' => $value['URL'],
                     'type' => $value['TYPE'],
                     'parentId' => $this->parent ? $this->parent->id : 0,
                     'icon' => $value['ICON']
@@ -177,15 +184,14 @@ class ImportController extends Controller
     protected function loadGradeLevels(array $data): array
     {
         foreach($data as $value) {
-            $label = Str::slug($value['NAME']);
-            $gradeLevel = GradeLevel::where('label', $label)->first();
+            $code = strtoupper($value['KEY']);
+            $gradeLevel = GradeLevel::where('key', $code)->first();
 
             if (! $gradeLevel) {
 
                 $gradeLevel = GradeLevel::create([
                     'name' => $value['NAME'],
-                    'label' => $label,
-                    'code' => $value['KEY'],
+                    'key' => $code,
                 ]);
 
             }
@@ -199,11 +205,8 @@ class ImportController extends Controller
     protected function loadStaff(array $data): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         foreach ($data as $value) {
-            $middlename = (isset($value["MIDDLENAME"]) && $value["MIDDLENAME"] !== "-") ? $value["MIDDLENAME"] . " " : "";
-            $name = $value['FIRSTNAME'] . " " . $middlename . $value["SURNAME"];
-
             $role = Role::where('label', 'staff')->first();
-            $gradeLevel = GradeLevel::where('code', $value['GRADE'])->first();
+            $gradeLevel = GradeLevel::where('key', $value['GRADE'])->first();
             $department = Department::where('code', $value['DEPARTMENT'])->first();
             $staff = User::where('email', $value['EMAIL'])->first();
 
@@ -211,12 +214,11 @@ class ImportController extends Controller
 
             if (! $staff && $role && $gradeLevel && $department) {
                 $staff = User::create([
-                    'staff_no' => $value['STAFF ID'],
+                    'staff_no' => $value['ID'],
                     'email' => $value['EMAIL'],
-                    'name' => $name,
                     'firstname' => $value['FIRSTNAME'],
-                    'middlename' => $middlename,
-                    'surname' => $value["SURNAME"],
+                    'middlename' => $value['MIDDLENAME'] ?? '',
+                    'surname' => $value['SURNAME'],
                     'grade_level_id' => $gradeLevel->id,
                     'department_id' => $department->id,
                     'password' => Hash::make($password),
@@ -233,18 +235,22 @@ class ImportController extends Controller
         return UserResource::collection($this->bulk);
     }
 
+    protected function loadClaims(array $data) {
+
+    }
+
     protected function loadDepartments(array $data): array
     {
         foreach ($data as $value) {
             $department = Department::where('code', $value['CODE'])->first();
 
             if (! $department) {
-                $parent = $value['PARENT'] !== 'none' ? Department::where('code', $value['PARENT'])->first() : null;
+                $parent = $value['PARENT'] !== 'NA' ? Department::where('code', $value['PARENT'])->first() : null;
                 $parentId = $parent !== null ? $parent->id : 0;
 
                 $department = Department::create([
                     'name' => $value['NAME'],
-                    'label' => Str::slug($value['NAME']),
+                    'label' => $value['LABEL'],
                     'code' => $value['CODE'],
                     'type' => strtolower($value['TYPE']),
                     'parentId' => $parentId,
@@ -261,7 +267,7 @@ class ImportController extends Controller
     {
         $dataChunk = [];
 
-        foreach ($data as $key => $value) {
+        foreach ($data as $value) {
             $label = Str::slug($value['NAME']);
             $role = Role::where('label', $label)->first();
 
@@ -271,8 +277,8 @@ class ImportController extends Controller
                     'label' => $label,
                     'slots' => $value['SLOT'],
                     'type' => $value['TYPE'],
-                    'isSuper' => $value['SUPER'] == 1 ? true : false,
-                    'no_expiration' => $value['EXPIRE'] == 1 ? true : false,
+                    'isSuper' => $value['SUPER'] == 1,
+                    'no_expiration' => $value['EXPIRE'] == 1,
                     'start' => Carbon::now(),
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),

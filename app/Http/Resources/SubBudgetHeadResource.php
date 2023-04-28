@@ -17,10 +17,9 @@ class SubBudgetHeadResource extends JsonResource
         return [
             "id" => $this->id,
             "budget_head_id" => $this->budget_head_id,
-            "budget_head_name" => $this->budgetHead->name,
-            "budget_head_code" => $this->budgetHead->budgetId,
             "department_id" => $this->department_id,
-            "budget_owner" => $this->department->code,
+            "budgetHead" => $this->budgetHead,
+            "budget_owner" => $this->department,
             "code" => $this->code,
             "name" => $this->name,
             "label" => $this->label,

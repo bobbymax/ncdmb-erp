@@ -38,6 +38,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected $with = ['claims', 'department', 'roles', 'level'];
+
     public function claims(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Claim::class);
