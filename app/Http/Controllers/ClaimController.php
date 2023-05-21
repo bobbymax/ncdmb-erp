@@ -6,6 +6,7 @@ use App\Http\Resources\ClaimResource;
 use App\Models\Claim;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ClaimController extends Controller
@@ -21,7 +22,7 @@ class ClaimController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $claims = Claim::with('expenses')->latest()->get();
+        $claims = Claim::with('expenses')->where('user_id', Auth::user()->id)->latest()->get();
 
         if ($claims->count() < 1) {
             return response()->json([

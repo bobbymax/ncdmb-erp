@@ -64,7 +64,7 @@ class ExpenditureController extends Controller
             'beneficiary' => 'required|string',
             'description' => 'required',
             'payment_type' => 'required|string|in:staff-payment,third-party',
-            'type' => 'string|in:cash-advance,retirement,other',
+            'type' => 'string|in:claim,touring-advance,other',
             'amount' => 'required',
         ]);
 
